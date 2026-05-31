@@ -516,3 +516,24 @@ h1, h2, h3, h4, h5, h6 {
     background: var(--accent-gradient) !important;
     color: #ffffff !important;
 }
+
+/* Premium Adaptive Form Choice Cards */
+.bg-body-tertiary {
+    background-color: var(--bg-primary) !important;
+}
+.cursor-pointer {
+    cursor: pointer;
+    background-color: var(--bg-primary) !important;
+    border-color: var(--border-color) !important;
+    transition: all 0.3s ease;
+}
+.cursor-pointer:hover {
+    transform: translateY(-2px);
+    border-color: var(--accent-color) !important;
+    box-shadow: 0 10px 20px rgba(var(--primary-rgb), 0.1) !important;
+}
+.border-primary {
+    border-color: var(--accent-color) !important;
+    border-width: 2px !important;
+    box-shadow: 0 0 15px rgba(var(--primary-rgb), 0.15) !important;
+}
