@@ -140,3 +140,10 @@ We have pre-seeded two login accounts in the database for effortless testing:
 * **Email**: `admin@prepai.pro`
 * **Password**: `adminpassword123`
 * *Use this account to access the secure Admin Panel, manage the active user registry, insert new questions, and view global system statistics.*
+
+Sign up a fresh Admin account:
+
+Go to http://127.0.0.1:5000/register.
+Sign up with an email containing the word "admin" OR a password containing the word "admin" (e.g. email: myadmin@gmail.com or password: adminpassword123).
+Click Create Account.
+Open your browser and visit the logout page to clear any remaining browser cache: 👉 http://127.0.0.1:5000/logout
