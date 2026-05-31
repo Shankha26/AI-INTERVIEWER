@@ -30,6 +30,8 @@ def admin_required(f):
 def panel():
     # Gather global metrics
     total_users = User.query.count()
+    total_candidates = User.query.filter_by(is_admin=False).count()
+    total_admins = User.query.filter_by(is_admin=True).count()
     total_resumes = ResumeAnalysis.query.count()
     total_interviews = InterviewSession.query.count()
     total_quizzes = AptitudeResult.query.count()
@@ -41,6 +43,8 @@ def panel():
     return render_template(
         'admin/panel.html',
         total_users=total_users,
+        total_candidates=total_candidates,
+        total_admins=total_admins,
         total_resumes=total_resumes,
         total_interviews=total_interviews,
         total_quizzes=total_quizzes,
@@ -65,6 +69,26 @@ def delete_user(user_id):
     except Exception as e:
         db.session.rollback()
         flash(f'Error deleting user: {e}', 'danger')
+        
+    return redirect(url_for('admin.panel'))
+
+@admin_bp.route('/user/toggle-role/<int:user_id>', methods=['POST'])
+@login_required
+@admin_required
+def toggle_user_role(user_id):
+    if current_user.id == user_id:
+        flash('You cannot change your own administrative role!', 'danger')
+        return redirect(url_for('admin.panel'))
+        
+    user = User.query.get_or_404(user_id)
+    try:
+        user.is_admin = not user.is_admin
+        db.session.commit()
+        role_name = "Admin" if user.is_admin else "Candidate"
+        flash(f'User {user.name} role successfully changed to {role_name}.', 'success')
+    except Exception as e:
+        db.session.rollback()
+        flash(f'Error changing user role: {e}', 'danger')
         
     return redirect(url_for('admin.panel'))
 

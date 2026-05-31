@@ -19,30 +19,37 @@
 </div>
 
 <!-- System-wide stats grid -->
-<div class="row mb-4 g-3">
-    <div class="col-6 col-lg-3">
-        <div class="premium-card text-center py-3">
+<div class="row row-cols-2 row-cols-md-3 row-cols-lg-5 g-3 mb-4">
+    <div class="col">
+        <div class="premium-card text-center py-3 h-100">
             <i class="bi bi-people-fill text-primary fs-3 mb-2"></i>
-            <h4 class="fw-bold mb-0">{{ total_users }}</h4>
+            <h4 class="fw-bold mb-0">{{ total_candidates }}</h4>
             <span class="text-secondary small">Total Candidates</span>
         </div>
     </div>
-    <div class="col-6 col-lg-3">
-        <div class="premium-card text-center py-3">
+    <div class="col">
+        <div class="premium-card text-center py-3 h-100">
+            <i class="bi bi-shield-fill-check text-indigo fs-3 mb-2"></i>
+            <h4 class="fw-bold mb-0">{{ total_admins }}</h4>
+            <span class="text-secondary small">Total Admins</span>
+        </div>
+    </div>
+    <div class="col">
+        <div class="premium-card text-center py-3 h-100">
             <i class="bi bi-file-earmark-bar-graph-fill text-info fs-3 mb-2"></i>
             <h4 class="fw-bold mb-0">{{ total_resumes }}</h4>
             <span class="text-secondary small">Resumes Scanned</span>
         </div>
     </div>
-    <div class="col-6 col-lg-3">
-        <div class="premium-card text-center py-3">
+    <div class="col">
+        <div class="premium-card text-center py-3 h-100">
             <i class="bi bi-chat-quote-fill text-success fs-3 mb-2"></i>
             <h4 class="fw-bold mb-0">{{ total_interviews }}</h4>
             <span class="text-secondary small">Interviews Conducted</span>
         </div>
     </div>
-    <div class="col-6 col-lg-3">
-        <div class="premium-card text-center py-3">
+    <div class="col">
+        <div class="premium-card text-center py-3 h-100">
             <i class="bi bi-award-fill text-warning fs-3 mb-2"></i>
             <h4 class="fw-bold mb-0">{{ total_quizzes }}</h4>
             <span class="text-secondary small">Quizzes Taken</span>
@@ -56,7 +63,7 @@
             <!-- Tabs Navigation -->
             <ul class="nav nav-tabs border-bottom mb-4" id="adminTab" role="tablist">
                 <li class="nav-item" role="presentation">
-                    <button class="nav-link active fw-bold text-indigo" id="users-tab" data-bs-toggle="tab" data-bs-target="#users-pane" type="button" role="tab">Manage Candidates</button>
+                    <button class="nav-link active fw-bold text-indigo" id="users-tab" data-bs-toggle="tab" data-bs-target="#users-pane" type="button" role="tab">Manage Users</button>
                 </li>
                 <li class="nav-item" role="presentation">
                     <button class="nav-link fw-bold text-indigo" id="q-add-tab" data-bs-toggle="tab" data-bs-target="#q-add-pane" type="button" role="tab">Add Question</button>
@@ -69,6 +76,22 @@
             <div class="tab-content text-secondary small" id="adminTabContent">
                 <!-- 1. Manage Users -->
                 <div class="tab-pane fade show active" id="users-pane" role="tabpanel">
+                    
+                    <!-- Search & Dynamic Filter Actions -->
+                    <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
+                        <div class="input-group" style="max-width: 350px;">
+                            <span class="input-group-text bg-transparent border-secondary-subtle">
+                                <i class="bi bi-search text-secondary"></i>
+                            </span>
+                            <input type="text" id="userSearchInput" class="form-control form-control-premium border-start-0 ps-0 text-secondary" placeholder="Search users by name or email...">
+                        </div>
+                        <div class="btn-group rounded-pill overflow-hidden shadow-sm" role="group">
+                            <button type="button" class="btn btn-sm btn-outline-primary active" id="filterAllBtn" onclick="filterUserTable('all')">All ({{ users | length }})</button>
+                            <button type="button" class="btn btn-sm btn-outline-primary" id="filterCandidatesBtn" onclick="filterUserTable('candidate')">Candidates ({{ total_candidates }})</button>
+                            <button type="button" class="btn btn-sm btn-outline-primary" id="filterAdminsBtn" onclick="filterUserTable('admin')">Admins ({{ total_admins }})</button>
+                        </div>
+                    </div>
+
                     <div class="table-responsive">
                         <table class="table glass-table align-middle">
                             <thead>
@@ -81,13 +104,13 @@
                                     <th class="text-end">Actions</th>
                                 </tr>
                             </thead>
-                            <tbody>
+                            <tbody id="userTableBody">
                                 {% for u in users %}
-                                    <tr>
+                                    <tr data-is-admin="{% if u.is_admin %}true{% else %}false{% endif %}">
                                         <td><span class="fw-bold">#{{ u.id }}</span></td>
                                         <td>
                                             <div class="d-flex align-items-center gap-2">
-                                                <i class="bi bi-person-circle fs-5 text-indigo"></i>
+                                                <i class="bi bi-person-circle fs-5 {% if u.is_admin %}text-warning{% else %}text-indigo{% endif %}"></i>
                                                 <span class="fw-semibold">{{ u.name }}</span>
                                             </div>
                                         </td>
@@ -103,6 +126,14 @@
                                         </td>
                                         <td class="text-end">
                                             {% if current_user.id != u.id %}
+                                                <!-- Change Role Action -->
+                                                <form action="{{ url_for('admin.toggle_user_role', user_id=u.id) }}" method="POST" class="d-inline" onsubmit="return confirm('Are you sure you want to change this user\'s access privileges?')">
+                                                    <button type="submit" class="btn btn-outline-warning btn-sm rounded-pill px-3 me-1">
+                                                        <i class="bi bi-shield-lock-fill"></i> Change Role
+                                                    </button>
+                                                </form>
+                                                
+                                                <!-- Delete User Action -->
                                                 <form action="{{ url_for('admin.delete_user', user_id=u.id) }}" method="POST" class="d-inline" onsubmit="return confirm('Are you sure you want to delete this user profile? This action will purge all their resumes, interviews, and scores!')">
                                                     <button type="submit" class="btn btn-outline-danger btn-sm rounded-pill px-3">
                                                         <i class="bi bi-trash-fill"></i> Delete
@@ -237,4 +268,52 @@
         </div>
     </div>
 </div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function filterUserTable(role) {
+    const searchVal = document.getElementById('userSearchInput').value.toLowerCase();
+    const rows = document.querySelectorAll('#userTableBody tr');
+    
+    // Update active filter button state
+    document.getElementById('filterAllBtn').classList.toggle('active', role === 'all');
+    document.getElementById('filterCandidatesBtn').classList.toggle('active', role === 'candidate');
+    document.getElementById('filterAdminsBtn').classList.toggle('active', role === 'admin');
+    
+    rows.forEach(row => {
+        const nameText = row.children[1] ? row.children[1].textContent.toLowerCase() : "";
+        const emailText = row.children[2] ? row.children[2].textContent.toLowerCase() : "";
+        const branchText = row.children[3] ? row.children[3].textContent.toLowerCase() : "";
+        const combinedText = nameText + " " + emailText + " " + branchText;
+        
+        const isUserAdmin = row.getAttribute('data-is-admin') === 'true';
+        
+        const matchesSearch = combinedText.includes(searchVal);
+        let matchesRole = true;
+        
+        if (role === 'candidate') {
+            matchesRole = !isUserAdmin;
+        } else if (role === 'admin') {
+            matchesRole = isUserAdmin;
+        }
+        
+        if (matchesSearch && matchesRole) {
+            row.style.display = '';
+        } else {
+            row.style.display = 'none';
+        }
+    });
+}
+
+document.getElementById('userSearchInput').addEventListener('input', () => {
+    // Re-apply active filter on search input
+    const activeBtn = document.querySelector('.btn-group .active');
+    if (activeBtn) {
+        if (activeBtn.id === 'filterCandidatesBtn') filterUserTable('candidate');
+        else if (activeBtn.id === 'filterAdminsBtn') filterUserTable('admin');
+        else filterUserTable('all');
+    }
+});
+</script>
 {% endblock %}

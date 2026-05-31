@@ -19,6 +19,10 @@ def create_app():
     app = Flask(__name__)
     app.config.from_object(Config)
     
+    # Apply ProxyFix middleware (Issue 3: Session Persist over Reverse Proxies)
+    from werkzeug.middleware.proxy_fix import ProxyFix
+    app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1, x_prefix=1)
+    
     # Initialize DB
     db.init_app(app)
     
@@ -32,7 +36,7 @@ def create_app():
     def load_user(user_id):
         return User.query.get(int(user_id))
         
-    # Ensure necessary upload folders exist on startup
+    # Ensure necessary upload folders exist on startup (wrapped safely for serverless environments)
     for folder_path in [
         app.config['UPLOAD_FOLDER'],
         app.config['RESUME_FOLDER'],
@@ -40,7 +44,10 @@ def create_app():
         app.config['AUDIO_FOLDER'],
         app.config['PROFILE_FOLDER']
     ]:
-        os.makedirs(folder_path, exist_ok=True)
+        try:
+            os.makedirs(folder_path, exist_ok=True)
+        except Exception as e:
+            print(f"Warning: Could not create upload directory {folder_path} on serverless runtime: {e}")
         
     # Register Blueprints
     app.register_blueprint(auth_bp)
@@ -51,6 +58,37 @@ def create_app():
     app.register_blueprint(career_bp)
     app.register_blueprint(admin_bp)
     
+    # Protected Routes Middleware (Issue 5: Access Control Enforcement)
+    from flask import request, redirect, url_for, flash, abort
+    from flask_login import current_user
+    
+    @app.before_request
+    def check_route_access():
+        # Exempt static assets, dynamic uploads, authentication routes, and the landing page from role checks
+        exempt_prefixes = ['/static', '/uploads', '/auth', '/login', '/register', '/logout']
+        exempt_endpoints = ['auth.login', 'auth.register', 'auth.logout', 'static', 'uploaded_file', 'dashboard.landing']
+        
+        if not request.endpoint or request.endpoint in exempt_endpoints:
+            return
+            
+        for prefix in exempt_prefixes:
+            if request.path.startswith(prefix):
+                return
+                
+        if current_user.is_authenticated:
+            # Issue 5: Admin visiting Candidate route -> Redirect to Admin Dashboard (/admin/panel)
+            if current_user.is_admin:
+                candidate_prefixes = ['/dashboard', '/profile', '/resume', '/interview', '/aptitude', '/career']
+                is_candidate_route = any(request.path.startswith(pref) for pref in candidate_prefixes) and not request.path.startswith('/admin')
+                
+                if is_candidate_route:
+                    flash('Administrative sessions are automatically redirected to the control panel.', 'info')
+                    return redirect(url_for('admin.panel'))
+            else:
+                # Issue 5: Candidate visiting Admin route -> 403 Forbidden
+                if request.path.startswith('/admin'):
+                    abort(403)
+                    
     # Serve uploaded media (resumes, video responses, audio responses, profile photos)
     @app.route('/uploads/<path:filename>')
     def uploaded_file(filename):
@@ -75,13 +113,20 @@ def create_app():
         from datetime import datetime
         return {'now': datetime.utcnow()}
         
-    # Initialize database tables
+    # Initialize database tables and auto-seed if empty
     with app.app_context():
         try:
             db.create_all()
             print("Database schemas created/verified successfully!")
+            
+            # Auto-seed default credentials and question bank on startup if clean
+            from models.user import User
+            if User.query.count() == 0:
+                print("Database is empty. Initiating automatic seeding process...")
+                from seed import perform_seeding
+                perform_seeding()
         except Exception as e:
-            print(f"Error creating database schemas: {e}")
+            print(f"Error creating/seeding database tables: {e}")
             
     return app
 

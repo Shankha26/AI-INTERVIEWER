@@ -25,15 +25,24 @@ def register():
             )
             new_user.set_password(form.password.data)
             
-            # Elevate to admin automatically if first user or email/password contains "admin" for local development ease
-            if User.query.count() == 0 or "admin" in form.email.data.lower() or "admin" in form.password.data.lower():
+            # Elevate to admin automatically if first user or email contains "admin" and has the official "@prepai.pro" domain
+            email_lower = form.email.data.lower()
+            if User.query.count() == 0 or ("admin" in email_lower and email_lower.endswith("@prepai.pro")):
                 new_user.is_admin = True
                 
             db.session.add(new_user)
             db.session.commit()
             
-            flash('Registration successful! Please login.', 'success')
-            return redirect(url_for('auth.login'))
+            # Auto-login the newly registered user
+            login_user(new_user)
+            
+            flash('Registration successful! Welcome to PrepAI Pro.', 'success')
+            
+            # Immediate role-based dashboard redirection
+            if new_user.is_admin:
+                return redirect(url_for('admin.panel'))
+            else:
+                return redirect(url_for('dashboard.index'))
         except Exception as e:
             db.session.rollback()
             flash(f'An error occurred: {e}', 'danger')
