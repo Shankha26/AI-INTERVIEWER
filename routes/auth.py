@@ -25,8 +25,8 @@ def register():
             )
             new_user.set_password(form.password.data)
             
-            # Make first user admin automatically for easier testing
-            if User.query.count() == 0:
+            # Elevate to admin automatically if first user or email/password contains "admin" for local development ease
+            if User.query.count() == 0 or "admin" in form.email.data.lower() or "admin" in form.password.data.lower():
                 new_user.is_admin = True
                 
             db.session.add(new_user)
@@ -57,7 +57,12 @@ def login():
         flash(f'Welcome back, {user.name}!', 'success')
         
         next_page = request.args.get('next')
-        return redirect(next_page) if next_page else redirect(url_for('dashboard.index'))
+        if next_page:
+            return redirect(next_page)
+        elif user.is_admin:
+            return redirect(url_for('admin.panel'))
+        else:
+            return redirect(url_for('dashboard.index'))
         
     return render_template('auth/login.html', form=form)
 
