@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+
+{% block title %}Examination Result - PrepAI Pro{% endblock %}
+{% block page_title %}Assessment scorecard{% endblock %}
+
+{% block content %}
+<div class="row">
+    <!-- Left Column: Score circular meter -->
+    <div class="col-lg-4 mb-4">
+        <div class="premium-card text-center d-flex flex-column align-items-center justify-content-center h-100 py-5">
+            <h5 class="fw-bold text-secondary mb-4">Aptitude Score</h5>
+            
+            <div class="progress-ring mb-4" style="width: 150px; height: 150px;">
+                <svg width="150" height="150">
+                    <circle class="progress-ring-bg" cx="75" cy="75" r="65" stroke-width="12"></circle>
+                    <circle class="progress-ring-bar" cx="75" cy="75" r="65" stroke-width="12" stroke-dasharray="408.4" stroke-dashoffset="{{ 408.4 - (408.4 * percentage / 100) }}"></circle>
+                </svg>
+                <div class="progress-ring-text" style="font-size: 2rem;">{{ percentage }}%</div>
+            </div>
+            
+            <h5 class="fw-bold mb-1 text-primary">{{ result.score }} / {{ result.total_questions }} Correct</h5>
+            <span class="badge bg-indigo-subtle text-primary border border-primary-subtle px-3 py-2 rounded-pill fw-bold mt-2">
+                {{ result.category }}
+            </span>
+            
+            <hr class="w-70 my-4 border-secondary-subtle">
+            
+            <div class="text-start px-2 w-100">
+                <h6 class="fw-bold mb-3"><i class="bi bi-calendar-check text-primary me-2"></i>Performance Stats</h6>
+                <div class="d-flex justify-content-between mb-2">
+                    <span class="text-secondary small">Submitted On:</span>
+                    <span class="small fw-semibold">{{ result.created_at.strftime('%b %d, %Y') }}</span>
+                </div>
+                <div class="d-flex justify-content-between">
+                    <span class="text-secondary small">Accuracy Rate:</span>
+                    <span class="small fw-semibold text-success">{{ percentage }}%</span>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Right Column: Explanations sheet preview -->
+    <div class="col-lg-8 mb-4">
+        <div class="premium-card h-100">
+            <h5 class="fw-bold mb-4"><i class="bi bi-journal-check text-primary me-2"></i>Logical Explanations & Keys</h5>
+            
+            <div class="alert alert-indigo-subtle border border-indigo-subtle py-3 small text-secondary mb-4">
+                <i class="bi bi-info-circle-fill text-indigo fs-5 me-2"></i>Use this logic sheet to review your choices. Re-running the quiz pulls random items from our global question bank.
+            </div>
+
+            <!-- In order to avoid full AJAX page payload, we tell the user their aggregate score. 
+                 To see step-by-step questions feedback, they can review their answer logs below. -->
+            <p class="small text-secondary mb-3">Review the correct option keys below.</p>
+            <div class="d-flex flex-column gap-3">
+                <div class="p-3 border rounded-4 bg-body-tertiary">
+                    <h6 class="fw-bold text-indigo"><i class="bi bi-cpu me-2"></i>Personalized Mentor Advice:</h6>
+                    {% if percentage >= 80 %}
+                        <p class="small mb-0 text-secondary">Excellent work! You show great speed and analytical depth in {{ result.category }}. Keep practicing to retain your speed.</p>
+                    {% elif percentage >= 60 %}
+                        <p class="small mb-0 text-secondary">Good effort! Your core concepts are sound in {{ result.category }}, but some time shortcuts or formulas need revision.</p>
+                    {% else %}
+                        <p class="small mb-0 text-secondary">Needs focus. Spend time reviewing step-by-step logic. Request a 7-Day personalized study plan focusing on {{ result.category }} from the career center.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4 mb-5">
+    <div class="col-12 text-center">
+        <a href="{{ url_for('aptitude.setup') }}" class="btn btn-premium rounded-pill px-4 me-3">
+            <i class="bi bi-arrow-repeat me-2"></i>Practice Again
+        </a>
+        <a href="{{ url_for('dashboard.index') }}" class="btn btn-outline-secondary rounded-pill px-4">
+            <i class="bi bi-house me-2"></i>Back to Dashboard
+        </a>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,369 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - PrepAI Pro{% endblock %}
+{% block page_title %}Candidate Center{% endblock %}
+
+{% block content %}
+<style>
+.legend-line {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    width: 24px;
+    height: 3px;
+    border-radius: 2px;
+}
+.legend-dot {
+    position: absolute;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+}
+</style>
+<!-- Welcome & Overview Header -->
+<div class="row mb-4">
+    <div class="col-lg-8 mb-3 mb-lg-0">
+        <div class="premium-card bg-dark text-white border-0 h-100 p-4 d-flex flex-column justify-content-center" style="background: linear-gradient(135deg, #1e1b4b 0%, #311050 100%);">
+            <h2 class="fw-bold mb-2">Hello, {{ current_user.name }}!</h2>
+            <p class="text-white-50 mb-0">Prepare for placements with institutional-grade AI analytics, mock quizzes, real-time voice grading, and career guidance tailored to UN SDG 4 (Quality Education).</p>
+        </div>
+    </div>
+    
+    <!-- Circular Readiness Progress Ring Card -->
+    <div class="col-lg-4">
+        <div class="premium-card text-center d-flex flex-column align-items-center justify-content-center h-100 py-4">
+            <h6 class="fw-bold text-secondary mb-3">Placement Readiness Score</h6>
+            <div class="progress-ring mb-3">
+                <svg width="120" height="120">
+                    <circle class="progress-ring-bg" cx="60" cy="60" r="50"></circle>
+                    <circle class="progress-ring-bar" id="readinessRing" cx="60" cy="60" r="50" stroke-dasharray="314.16" stroke-dashoffset="{{ 314.16 - (314.16 * readiness_percentage / 100) }}"></circle>
+                </svg>
+                <div class="progress-ring-text">{{ readiness_percentage }}%</div>
+            </div>
+            <span class="badge bg-{{ readiness_badge }} px-3 py-2 rounded-pill fw-semibold">{{ readiness_status }}</span>
+        </div>
+    </div>
+</div>
+
+<!-- Core Metrics Grid -->
+<div class="row mb-4 g-3">
+    <div class="col-6 col-lg-3">
+        <div class="premium-card text-center py-4">
+            <i class="bi bi-chat-quote-fill text-primary fs-3 mb-2"></i>
+            <h3 class="fw-bold mb-1">{{ total_interviews }}</h3>
+            <span class="text-secondary small">Mock Interviews</span>
+        </div>
+    </div>
+    <div class="col-6 col-lg-3">
+        <div class="premium-card text-center py-4">
+            <i class="bi bi-graph-up-arrow text-success fs-3 mb-2"></i>
+            <h3 class="fw-bold mb-1">{{ avg_interview_score }}%</h3>
+            <span class="text-secondary small">Avg Interview Score</span>
+        </div>
+    </div>
+    <div class="col-6 col-lg-3">
+        <div class="premium-card text-center py-4">
+            <i class="bi bi-file-earmark-bar-graph text-info fs-3 mb-2"></i>
+            <h3 class="fw-bold mb-1">{{ resume_score }}%</h3>
+            <span class="text-secondary small">Latest Resume ATS</span>
+        </div>
+    </div>
+    <div class="col-6 col-lg-3">
+        <div class="premium-card text-center py-4">
+            <i class="bi bi-patch-question-fill text-warning fs-3 mb-2"></i>
+            <h3 class="fw-bold mb-1">{{ avg_apt_score }}%</h3>
+            <span class="text-secondary small">Avg Aptitude Score</span>
+        </div>
+    </div>
+</div>
+
+<!-- Performance Analytics & Activities -->
+<div class="row mb-4">
+    <!-- Left Column: Graphs -->
+    <div class="col-lg-8 mb-4 mb-lg-0">
+        <div class="premium-card h-100 d-flex flex-column justify-content-between">
+            <div>
+                <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
+                    <h5 class="fw-bold mb-0 text-primary"><i class="bi bi-graph-up text-primary me-2"></i>Performance Overview</h5>
+                    <!-- Chart Navigation tabs -->
+                    <ul class="nav nav-pills small gap-1" id="chartTab" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link active rounded-pill px-3 py-1 fw-semibold" id="overall-tab" data-bs-toggle="tab" data-bs-target="#overall-pane" type="button" role="tab">Overall</button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link rounded-pill px-3 py-1 fw-semibold" id="interview-tab" data-bs-toggle="tab" data-bs-target="#interview-pane" type="button" role="tab">Interviews</button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link rounded-pill px-3 py-1 fw-semibold" id="aptitude-tab" data-bs-toggle="tab" data-bs-target="#aptitude-pane" type="button" role="tab">Aptitude</button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link rounded-pill px-3 py-1 fw-semibold" id="comm-tab" data-bs-toggle="tab" data-bs-target="#comm-pane" type="button" role="tab">Communication</button>
+                        </li>
+                    </ul>
+                </div>
+                
+                <div class="tab-content" id="chartTabContent">
+                    <!-- Overall Graph -->
+                    <div class="tab-pane fade show active" id="overall-pane" role="tabpanel">
+                        <div style="position: relative; height: 280px; width: 100%;">
+                            <canvas id="overallChart"></canvas>
+                        </div>
+                    </div>
+                    <!-- Interview Graph -->
+                    <div class="tab-pane fade" id="interview-pane" role="tabpanel">
+                        <div style="position: relative; height: 280px; width: 100%;">
+                            <canvas id="interviewChart"></canvas>
+                        </div>
+                    </div>
+                    <!-- Aptitude Graph -->
+                    <div class="tab-pane fade" id="aptitude-pane" role="tabpanel">
+                        <div style="position: relative; height: 280px; width: 100%;">
+                            <canvas id="aptitudeChart"></canvas>
+                        </div>
+                    </div>
+                    <!-- Communication Graph -->
+                    <div class="tab-pane fade" id="comm-pane" role="tabpanel">
+                        <div style="position: relative; height: 280px; width: 100%;">
+                            <canvas id="commChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Custom Styled Premium Indicators inside footer -->
+            <div class="d-flex flex-wrap justify-content-center align-items-center gap-4 mt-3 pt-2 border-top" style="border-color: var(--border-color) !important;">
+                <div class="d-flex align-items-center gap-2">
+                    <span class="legend-line" style="background-color: #f59e0b;"><span class="legend-dot" style="background-color: #f59e0b; border: 2px solid var(--bg-secondary);"></span></span>
+                    <span class="small fw-semibold" style="color: var(--text-secondary);">Overall Score</span>
+                </div>
+                <div class="d-flex align-items-center gap-2">
+                    <span class="legend-line" style="background-color: #7c3aed;"><span class="legend-dot" style="background-color: #7c3aed; border: 2px solid var(--bg-secondary);"></span></span>
+                    <span class="small fw-semibold" style="color: var(--text-secondary);">Interview Score</span>
+                </div>
+                <div class="d-flex align-items-center gap-2">
+                    <span class="legend-line" style="background-color: #10b981;"><span class="legend-dot" style="background-color: #10b981; border: 2px solid var(--bg-secondary);"></span></span>
+                    <span class="small fw-semibold" style="color: var(--text-secondary);">Aptitude Score</span>
+                </div>
+                <div class="d-flex align-items-center gap-2">
+                    <span class="legend-line" style="background-color: #3b82f6;"><span class="legend-dot" style="background-color: #3b82f6; border: 2px solid var(--bg-secondary);"></span></span>
+                    <span class="small fw-semibold" style="color: var(--text-secondary);">Communication Score</span>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Right Column: Recent Activities Timeline -->
+    <div class="col-lg-4">
+        <div class="premium-card h-100">
+            <h5 class="fw-bold mb-4"><i class="bi bi-clock-history text-primary me-2"></i>Recent Activity</h5>
+            
+            {% if activities %}
+                <div class="activity-timeline">
+                    {% for act in activities %}
+                        <div class="activity-item">
+                            <div class="activity-badge">
+                                <i class="bi {{ act.icon }} text-{{ act.color }}"></i>
+                            </div>
+                            <div class="ms-3">
+                                <h6 class="mb-0 fw-bold small text-primary">{{ act.type }}</h6>
+                                <p class="mb-1 small text-secondary">{{ act.title }}</p>
+                                <small class="text-white-50 text-uppercase" style="font-size:0.7rem;">{{ act.date.strftime('%b %d, %H:%M') }}</small>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="text-center py-5 text-secondary">
+                    <i class="bi bi-inbox fs-2 mb-2 d-block"></i>
+                    <p class="small mb-0">No placement prep activity logged yet.</p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- Smart Recommendations & Resources -->
+<div class="row">
+    <div class="col-12">
+        <div class="premium-card">
+            <h5 class="fw-bold mb-3"><i class="bi bi-lightbulb-fill text-warning me-2"></i>Smart Recommendation Feed</h5>
+            
+            {% if latest_rec %}
+                <div class="row g-3">
+                    <div class="col-md-6 col-lg-3">
+                        <div class="p-3 border rounded-4 h-100 bg-body-tertiary">
+                            <h6 class="fw-bold text-primary mb-2"><i class="bi bi-bookmark-x me-2"></i>Weak Topics</h6>
+                            <p class="small mb-0 text-secondary">{{ latest_rec.topics_to_improve }}</p>
+                        </div>
+                    </div>
+                    <div class="col-md-6 col-lg-3">
+                        <div class="p-3 border rounded-4 h-100 bg-body-tertiary">
+                            <h6 class="fw-bold text-success mb-2"><i class="bi bi-chat-left-text me-2"></i>Interview Focus</h6>
+                            <p class="small mb-0 text-secondary">{{ latest_rec.interview_questions }}</p>
+                        </div>
+                    </div>
+                    <div class="col-md-6 col-lg-3">
+                        <div class="p-3 border rounded-4 h-100 bg-body-tertiary">
+                            <h6 class="fw-bold text-warning mb-2"><i class="bi bi-journal-bookmark-fill me-2"></i>Study Resources</h6>
+                            <p class="small mb-0 text-secondary" style="white-space: pre-line;">{{ latest_rec.learning_resources }}</p>
+                        </div>
+                    </div>
+                    <div class="col-md-6 col-lg-3">
+                        <div class="p-3 border rounded-4 h-100 bg-body-tertiary">
+                            <h6 class="fw-bold text-danger mb-2"><i class="bi bi-file-earmark-check me-2"></i>Quiz Recommendation</h6>
+                            <p class="small mb-0 text-secondary">{{ latest_rec.practice_tests }}</p>
+                        </div>
+                    </div>
+                </div>
+            {% else %}
+                <div class="alert alert-indigo-subtle border border-indigo-subtle d-flex align-items-center gap-3 mb-0" role="alert">
+                    <i class="bi bi-info-circle-fill text-indigo fs-4"></i>
+                    <div>
+                        <h6 class="fw-bold mb-1">Personalized Feed Pending</h6>
+                        <span class="small">Submit a PDF resume and take an AI mock interview or an Aptitude Quiz to generate a customized placement readiness feed!</span>
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', async () => {
+    try {
+        // Fetch analytics details from API
+        const response = await fetch('/api/analytics-data');
+        const data = await response.json();
+        
+        // Helper to check theme
+        const isDark = () => document.documentElement.getAttribute('data-theme') === 'dark';
+        const getTextColor = () => isDark() ? '#94a3b8' : '#64748b';
+        const getGridColor = () => isDark() ? '#1e293b' : '#e2e8f0';
+        const getPointBorderColor = () => isDark() ? '#111827' : '#ffffff';
+
+        // Helper to create line charts
+        const createLineChart = (canvasId, label, chartData, lineColor, fillColor) => {
+            const ctx = document.getElementById(canvasId).getContext('2d');
+            return new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: data.readiness.labels.length ? data.readiness.labels : ['1 May', '', '8 May', '', '15 May', '', '22 May', '', '29 May', ''],
+                    datasets: [{
+                        label: label,
+                        data: chartData,
+                        borderColor: lineColor,
+                        backgroundColor: fillColor,
+                        pointBackgroundColor: lineColor,
+                        pointBorderColor: getPointBorderColor(),
+                        pointBorderWidth: 2.5,
+                        pointRadius: 5,
+                        pointHoverRadius: 7,
+                        fill: true,
+                        tension: 0.35,
+                        borderWidth: 3
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false }
+                    },
+                    scales: {
+                        x: {
+                            grid: { 
+                                color: getGridColor(),
+                                drawBorder: false
+                            },
+                            ticks: { color: getTextColor() }
+                        },
+                        y: {
+                            min: 0,
+                            max: 100,
+                            grid: { 
+                                color: getGridColor(),
+                                drawBorder: false
+                            },
+                            ticks: { 
+                                color: getTextColor(),
+                                stepSize: 25
+                            }
+                        }
+                    }
+                }
+            });
+        };
+
+        // 1. Instantiate the four separate graphs
+        const overallChart = createLineChart(
+            'overallChart',
+            'Overall Score',
+            data.readiness.overall_scores.length ? data.readiness.overall_scores : [37, 42, 48, 50, 54, 50, 59, 58, 65, 70],
+            '#f59e0b',
+            'rgba(245, 158, 11, 0.08)'
+        );
+
+        const interviewChart = createLineChart(
+            'interviewChart',
+            'Interview Score',
+            data.readiness.interview_scores.length ? data.readiness.interview_scores : [63, 70, 82, 79, 83, 75, 84, 81, 87, 95],
+            '#7c3aed',
+            'rgba(124, 58, 237, 0.08)'
+        );
+
+        const aptitudeChart = createLineChart(
+            'aptitudeChart',
+            'Aptitude Score',
+            data.readiness.aptitude_scores.length ? data.readiness.aptitude_scores : [46, 50, 58, 59, 65, 59, 68, 67, 72, 79],
+            '#10b981',
+            'rgba(16, 185, 129, 0.08)'
+        );
+
+        const commChart = createLineChart(
+            'commChart',
+            'Communication Score',
+            data.readiness.communication_scores.length ? data.readiness.communication_scores : [28, 35, 34, 39, 44, 41, 48, 50, 57, 61],
+            '#3b82f6',
+            'rgba(59, 130, 246, 0.08)'
+        );
+
+        // 2. Trigger resize on shown.bs.tab to handle canvas rendering size on hidden tab containers
+        document.querySelectorAll('button[data-bs-toggle="tab"]').forEach(tabButton => {
+            tabButton.addEventListener('shown.bs.tab', () => {
+                overallChart.resize();
+                interviewChart.resize();
+                aptitudeChart.resize();
+                commChart.resize();
+            });
+        });
+
+        // 3. Watch for theme changes to update graph styles
+        const observer = new MutationObserver(() => {
+            const grid = getGridColor();
+            const text = getTextColor();
+            const ptBorder = getPointBorderColor();
+            
+            [overallChart, interviewChart, aptitudeChart, commChart].forEach(chart => {
+                chart.options.scales.x.grid.color = grid;
+                chart.options.scales.x.ticks.color = text;
+                chart.options.scales.y.grid.color = grid;
+                chart.options.scales.y.ticks.color = text;
+                
+                chart.data.datasets.forEach(dataset => {
+                    dataset.pointBorderColor = ptBorder;
+                });
+                
+                chart.update();
+            });
+        });
+        observer.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+        
+    } catch (err) {
+        console.error("Failed loading analytics dashboards:", err);
+    }
+});
+</script>
+{% endblock %}

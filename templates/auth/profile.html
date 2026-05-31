@@ -1,0 +1,103 @@
+{% extends "base.html" %}
+
+{% block title %}My Profile - PrepAI Pro{% endblock %}
+{% block page_title %}Candidate Profile{% endblock %}
+
+{% block content %}
+<div class="row">
+    <!-- Left Column: User Card -->
+    <div class="col-lg-4 mb-4">
+        <div class="premium-card text-center">
+            <div class="position-relative d-inline-block mb-3">
+                <img src="{% if current_user.profile_image and current_user.profile_image != 'default.png' %}{{ url_for('uploaded_file', filename='profiles/' + current_user.profile_image) }}{% else %}{{ url_for('static', filename='images/default.png') }}{% endif %}" 
+                     class="rounded-circle border border-4 border-primary" 
+                     style="width: 150px; height: 150px; object-fit: cover;" 
+                     onerror="this.src='https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png'"
+                     alt="Profile Picture">
+            </div>
+            
+            <h4 class="fw-bold mb-1">{{ current_user.name }}</h4>
+            <p class="text-secondary small mb-3">{{ current_user.email }}</p>
+            
+            <div class="badge bg-indigo-subtle text-primary border border-primary-subtle px-3 py-2 rounded-pill mb-4">
+                <i class="bi bi-mortarboard-fill me-1"></i> {{ current_user.branch or 'General' }}
+            </div>
+            
+            <hr class="my-4 border-secondary-subtle">
+            
+            <div class="text-start">
+                <h6 class="fw-bold mb-3">Registration Info</h6>
+                <div class="d-flex justify-content-between mb-2">
+                    <span class="text-secondary small">College:</span>
+                    <span class="small fw-semibold text-end">{{ current_user.college or 'Not Set' }}</span>
+                </div>
+                <div class="d-flex justify-content-between mb-2">
+                    <span class="text-secondary small">Member Since:</span>
+                    <span class="small fw-semibold">{{ current_user.created_at.strftime('%b %d, %Y') }}</span>
+                </div>
+                <div class="d-flex justify-content-between">
+                    <span class="text-secondary small">Role:</span>
+                    <span class="badge {% if current_user.is_admin %}bg-success{% else %}bg-secondary{% endif %}">
+                        {% if current_user.is_admin %}Administrator{% else %}Candidate{% endif %}
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Right Column: Settings Form -->
+    <div class="col-lg-8">
+        <div class="premium-card">
+            <h5 class="fw-bold mb-4"><i class="bi bi-gear-fill text-primary me-2"></i>Account Settings</h5>
+            
+            <form action="{{ url_for('auth.profile') }}" method="POST" enctype="multipart/form-data">
+                {{ form.csrf_token }}
+                
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label for="name" class="form-label fw-semibold text-secondary">Full Name</label>
+                        {{ form.name(class="form-control form-control-premium") }}
+                        {% if form.name.errors %}
+                            <div class="text-danger small mt-1">{% for error in form.name.errors %}{{ error }}{% endfor %}</div>
+                        {% endif %}
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label fw-semibold text-secondary">Email Address</label>
+                        <input type="email" class="form-control form-control-premium" value="{{ current_user.email }}" disabled>
+                        <small class="text-white-50">Email cannot be modified.</small>
+                    </div>
+                </div>
+                
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label for="college" class="form-label fw-semibold text-secondary">College / University</label>
+                        {{ form.college(class="form-control form-control-premium") }}
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label for="branch" class="form-label fw-semibold text-secondary">Branch / Stream</label>
+                        {{ form.branch(class="form-select form-control-premium") }}
+                    </div>
+                </div>
+                
+                <div class="mb-3">
+                    <label for="profile_image" class="form-label fw-semibold text-secondary">Upload Profile Photo</label>
+                    {{ form.profile_image(class="form-control form-control-premium") }}
+                    <small class="text-secondary">Supported: PNG, JPG, JPEG.</small>
+                    {% if form.profile_image.errors %}
+                        <div class="text-danger small mt-1">{% for error in form.profile_image.errors %}{{ error }}{% endfor %}</div>
+                    {% endif %}
+                </div>
+                
+                <div class="mb-4">
+                    <label for="password" class="form-label fw-semibold text-secondary">New Password</label>
+                    {{ form.password(class="form-control form-control-premium", placeholder="Leave blank to keep current password") }}
+                </div>
+                
+                <button type="submit" class="btn btn-premium px-4">
+                    <i class="bi bi-save me-2"></i>Save Changes
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,135 @@
+{% extends "base.html" %}
+
+{% block title %}Mock Interview Setup - PrepAI Pro{% endblock %}
+{% block page_title %}AI Interview Simulator{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="premium-card">
+            <div class="text-center mb-4">
+                <i class="bi bi-chat-quote-fill text-primary fs-1 mb-2"></i>
+                <h3 class="fw-bold mb-2">Configure Mock Session</h3>
+                <p class="text-secondary small">Set up an adaptive placement interview. Gemini AI will generate domain-specific questions and assess technical depth, fluency, and structures.</p>
+            </div>
+            
+            <form action="{{ url_for('interview.start') }}" method="POST">
+                <!-- 1. Selection Mode -->
+                <div class="mb-4">
+                    <label class="form-label fw-bold text-secondary mb-3 d-block">Category Source</label>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <div class="p-3 border rounded-4 cursor-pointer text-center bg-body-tertiary shadow-sm hover-shadow transition-all border-primary" id="selectDomainCard" onclick="toggleCategory('domain')">
+                                <input class="form-check-input d-none" type="radio" name="category_type" id="catDomain" value="domain" checked>
+                                <i class="bi bi-code-square text-primary fs-2 mb-2 d-block"></i>
+                                <h6 class="fw-bold mb-0">Core Academic Subject</h6>
+                                <small class="text-secondary">C, Java, DSA, Operating Systems...</small>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="p-3 border rounded-4 cursor-pointer text-center bg-body-tertiary shadow-sm hover-shadow transition-all" id="selectCompanyCard" onclick="toggleCategory('company')">
+                                <input class="form-check-input d-none" type="radio" name="category_type" id="catCompany" value="company">
+                                <i class="bi bi-building-fill text-indigo fs-2 mb-2 d-block"></i>
+                                <h6 class="fw-bold mb-0">Company Specific prep</h6>
+                                <small class="text-secondary">Google, TCS, Amazon, Microsoft...</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 2. Domain dropdown -->
+                <div class="mb-4" id="domainGroup">
+                    <label for="domainSelect" class="form-label fw-semibold text-secondary">Choose Domain Subject</label>
+                    <select class="form-select form-control-premium" id="domainSelect" name="domain">
+                        {% for dom in domains %}
+                            <option value="{{ dom }}">{{ dom }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <!-- 3. Company dropdown (hidden by default) -->
+                <div class="mb-4 d-none" id="companyGroup">
+                    <label for="companySelect" class="form-label fw-semibold text-secondary">Select Target Employer</label>
+                    <select class="form-select form-control-premium" id="companySelect" name="company">
+                        {% for comp in companies %}
+                            <option value="{{ comp }}">{{ comp }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <!-- 4. Mode choice -->
+                <div class="mb-4">
+                    <label class="form-label fw-bold text-secondary mb-3 d-block">Interview Format</label>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <div class="p-3 border rounded-4 cursor-pointer text-center bg-body-tertiary shadow-sm hover-shadow transition-all border-primary" id="modeTextCard" onclick="toggleMode('text')">
+                                <input class="form-check-input d-none" type="radio" name="mode" id="modeText" value="text" checked>
+                                <i class="bi bi-keyboard-fill text-indigo fs-3 mb-2 d-block"></i>
+                                <h6 class="fw-bold mb-1">Standard Text Mock</h6>
+                                <small class="text-secondary">Type answers. Graded for accuracy and logic.</small>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="p-3 border rounded-4 cursor-pointer text-center bg-body-tertiary shadow-sm hover-shadow transition-all" id="modeVoiceCard" onclick="toggleMode('voice')">
+                                <input class="form-check-input d-none" type="radio" name="mode" id="modeVoice" value="voice">
+                                <i class="bi bi-camera-video-fill text-danger fs-3 mb-2 d-block"></i>
+                                <h6 class="fw-bold mb-1">AI Voice & Video Mock</h6>
+                                <small class="text-secondary">Speak answers. Graded for fluency, technical depth, and speed.</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="d-flex justify-content-between align-items-center mt-5">
+                    <a href="{{ url_for('interview.history') }}" class="btn btn-outline-secondary rounded-pill px-4">
+                        <i class="bi bi-clock-history me-1"></i> Session History
+                    </a>
+                    <button type="submit" class="btn btn-premium rounded-pill px-4">
+                        <i class="bi bi-rocket-takeoff-fill me-2"></i>Launch Session
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function toggleCategory(type) {
+    const domainGroup = document.getElementById('domainGroup');
+    const companyGroup = document.getElementById('companyGroup');
+    const domainCard = document.getElementById('selectDomainCard');
+    const companyCard = document.getElementById('selectCompanyCard');
+    
+    if (type === 'domain') {
+        document.getElementById('catDomain').checked = true;
+        domainGroup.classList.remove('d-none');
+        companyGroup.classList.add('d-none');
+        domainCard.classList.add('border-primary');
+        companyCard.classList.remove('border-primary');
+    } else {
+        document.getElementById('catCompany').checked = true;
+        domainGroup.classList.add('d-none');
+        companyGroup.classList.remove('d-none');
+        domainCard.classList.remove('border-primary');
+        companyCard.classList.add('border-primary');
+    }
+}
+
+function toggleMode(mode) {
+    const textCard = document.getElementById('modeTextCard');
+    const voiceCard = document.getElementById('modeVoiceCard');
+    
+    if (mode === 'text') {
+        document.getElementById('modeText').checked = true;
+        textCard.classList.add('border-primary');
+        voiceCard.classList.remove('border-primary');
+    } else {
+        document.getElementById('modeVoice').checked = true;
+        textCard.classList.remove('border-primary');
+        voiceCard.classList.add('border-primary');
+    }
+}
+</script>
+{% endblock %}

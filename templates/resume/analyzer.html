@@ -1,0 +1,128 @@
+{% extends "base.html" %}
+
+{% block title %}Resume Analyzer - PrepAI Pro{% endblock %}
+{% block page_title %}ATS Resume Scanner{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="premium-card">
+            <div class="text-center mb-4">
+                <i class="bi bi-file-earmark-arrow-up text-primary fs-1 mb-2"></i>
+                <h3 class="fw-bold mb-2">Analyze Your Resume</h3>
+                <p class="text-secondary small">Upload your resume in PDF format to calculate your ATS Score, map
+                    skills, identify keyword gaps, and receive suggestions for improvements.</p>
+            </div>
+
+            <form action="{{ url_for('resume.analyzer') }}" method="POST" enctype="multipart/form-data" id="resumeForm">
+                <!-- Premium Drag & Drop Area -->
+                <div class="border border-2 border-dashed border-secondary-subtle rounded-4 p-5 text-center mb-4 cursor-pointer hover-shadow transition-all"
+                    id="dropZone" style="background-color: var(--bg-primary);">
+                    <i class="bi bi-cloud-upload text-indigo fs-1 mb-3 d-block"></i>
+                    <h5 class="fw-bold mb-1">Drag and Drop PDF Resume here</h5>
+                    <span class="text-secondary small d-block mb-3">or click to browse your local computer files</span>
+
+                    <input type="file" name="resume" id="resumeFile" class="d-none" accept=".pdf" required>
+                    <button type="button" class="btn btn-outline-secondary rounded-pill px-4"
+                        onclick="document.getElementById('resumeFile').click()">
+                        Select PDF File
+                    </button>
+
+                    <div id="fileInfo" class="mt-3 d-none">
+                        <span class="badge bg-indigo text-white px-3 py-2 rounded-pill">
+                            <i class="bi bi-filetype-pdf me-2"></i><span id="fileName">resume.pdf</span>
+                        </span>
+                    </div>
+                </div>
+
+                <div class="d-flex justify-content-between align-items-center">
+                    <a href="{{ url_for('resume.history') }}" class="btn btn-outline-secondary rounded-pill">
+                        <i class="bi bi-clock-history me-1"></i> Scan History
+                    </a>
+                    <button type="submit" class="btn btn-premium px-4" id="submitBtn" disabled>
+                        <i class="bi bi-cpu-fill me-2"></i>Scan Resume
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- AI Analyzing Loading Overlay Modal -->
+<div class="modal fade" id="loadingModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
+    aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content glass-card border-0 p-4 text-center">
+            <div class="modal-body py-4">
+                <div class="spinner-border text-primary fs-3 mb-3" style="width: 3rem; height: 3rem;" role="status">
+                </div>
+                <h5 class="fw-bold mb-2">Analyzing Resume...</h5>
+                <p class="text-secondary small mb-0">Gemini AI is parsing text, matching keywords, scoring ATS metrics,
+                    and formatting recommendations. Please do not close this window.</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const dropZone = document.getElementById('dropZone');
+        const fileInput = document.getElementById('resumeFile');
+        const fileInfo = document.getElementById('fileInfo');
+        const fileName = document.getElementById('fileName');
+        const submitBtn = document.getElementById('submitBtn');
+        const resumeForm = document.getElementById('resumeForm');
+        const loadingModal = new bootstrap.Modal(document.getElementById('loadingModal'));
+
+        // Select file trigger
+        fileInput.addEventListener('change', (e) => {
+            handleFileSelect(e.target.files[0]);
+        });
+
+        // Drag-and-drop triggers
+        dropZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            dropZone.style.borderColor = '#4f46e5';
+            dropZone.style.backgroundColor = 'rgba(79, 70, 229, 0.05)';
+        });
+
+        ['dragleave', 'dragend'].forEach(type => {
+            dropZone.addEventListener(type, () => {
+                dropZone.style.borderColor = '';
+                dropZone.style.backgroundColor = '';
+            });
+        });
+
+        dropZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropZone.style.borderColor = '';
+            dropZone.style.backgroundColor = '';
+
+            if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+                fileInput.files = e.dataTransfer.files;
+                handleFileSelect(e.dataTransfer.files[0]);
+            }
+        });
+
+        function handleFileSelect(file) {
+            if (file && file.name.endsWith('.pdf')) {
+                fileName.textContent = file.name;
+                fileInfo.classList.remove('d-none');
+                submitBtn.disabled = false;
+            } else {
+                alert('Only PDF files are supported!');
+                fileInput.value = '';
+                fileInfo.classList.add('d-none');
+                submitBtn.disabled = true;
+            }
+        }
+
+        // Modal display on form submit
+        resumeForm.addEventListener('submit', () => {
+            loadingModal.show();
+        });
+    });
+</script>
+{% endblock %}

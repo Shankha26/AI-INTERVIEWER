@@ -1,0 +1,95 @@
+{% extends "base.html" %}
+
+{% block title %}Aptitude Test Setup - PrepAI Pro{% endblock %}
+{% block page_title %}Placement Aptitude Test{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="premium-card">
+            <div class="text-center mb-4">
+                <i class="bi bi-award-fill text-warning fs-1 mb-2"></i>
+                <h3 class="fw-bold mb-2">Aptitude Training Console</h3>
+                <p class="text-secondary small">Hone your problem-solving speeds. Select a subject below to initiate a timed MCQ testing session. Answers will be graded instantly with step-by-step logic sheets.</p>
+            </div>
+            
+            <form action="{{ url_for('aptitude.start') }}" method="POST">
+                <div class="mb-4">
+                    <label class="form-label fw-bold text-secondary mb-3 d-block">Choose Subject Category</label>
+                    
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <div class="p-3 border rounded-4 cursor-pointer text-center bg-body-tertiary shadow-sm hover-shadow transition-all border-primary" id="catQuantCard" onclick="selectCategory('Quantitative Aptitude')">
+                                <input class="form-check-input d-none" type="radio" name="category" id="catQuant" value="Quantitative Aptitude" checked>
+                                <i class="bi bi-calculator text-primary fs-2 mb-2 d-block"></i>
+                                <h6 class="fw-bold mb-1">Quantitative</h6>
+                                <small class="text-secondary small">Maths, speed, fractions, clocks...</small>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-4">
+                            <div class="p-3 border rounded-4 cursor-pointer text-center bg-body-tertiary shadow-sm hover-shadow transition-all" id="catLogicalCard" onclick="selectCategory('Logical Reasoning')">
+                                <input class="form-check-input d-none" type="radio" name="category" id="catLogical" value="Logical Reasoning">
+                                <i class="bi bi-puzzle text-indigo fs-2 mb-2 d-block"></i>
+                                <h6 class="fw-bold mb-1">Logical Reasoning</h6>
+                                <small class="text-secondary small">Series, puzzles, blood ties...</small>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-4">
+                            <div class="p-3 border rounded-4 cursor-pointer text-center bg-body-tertiary shadow-sm hover-shadow transition-all" id="catVerbalCard" onclick="selectCategory('Verbal Ability')">
+                                <input class="form-check-input d-none" type="radio" name="category" id="catVerbal" value="Verbal Ability">
+                                <i class="bi bi-translate text-danger fs-2 mb-2 d-block"></i>
+                                <h6 class="fw-bold mb-1">Verbal Ability</h6>
+                                <small class="text-secondary small">Grammar, synonyms, correction...</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="alert alert-indigo-subtle border border-indigo-subtle py-3 small text-secondary mb-4">
+                    <h6 class="fw-bold mb-1"><i class="bi bi-clock me-2"></i>Rules & Parameters:</h6>
+                    <ul class="mb-0 ps-3">
+                        <li>Each test serves 5 to 10 randomly loaded multiple choice questions.</li>
+                        <li>A strict <strong>10 minutes countdown timer</strong> is active. On expiration, the exam auto-submits.</li>
+                        <li>Each correct choice adds 1 point. Incorrect choices carry zero negative marks.</li>
+                    </ul>
+                </div>
+
+                <div class="d-flex justify-content-between align-items-center mt-5">
+                    <a href="{{ url_for('aptitude.history') }}" class="btn btn-outline-secondary rounded-pill px-4">
+                        <i class="bi bi-clock-history me-1"></i> Exam History
+                    </a>
+                    <button type="submit" class="btn btn-premium rounded-pill px-4">
+                        <i class="bi bi-play-circle-fill me-2"></i>Start Examination
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function selectCategory(category) {
+    const quantCard = document.getElementById('catQuantCard');
+    const logicalCard = document.getElementById('catLogicalCard');
+    const verbalCard = document.getElementById('catVerbalCard');
+    
+    // Clean all border styles
+    [quantCard, logicalCard, verbalCard].forEach(card => card.classList.remove('border-primary'));
+    
+    if (category === 'Quantitative Aptitude') {
+        document.getElementById('catQuant').checked = true;
+        quantCard.classList.add('border-primary');
+    } else if (category === 'Logical Reasoning') {
+        document.getElementById('catLogical').checked = true;
+        logicalCard.classList.add('border-primary');
+    } else {
+        document.getElementById('catVerbal').checked = true;
+        verbalCard.classList.add('border-primary');
+    }
+}
+</script>
+{% endblock %}

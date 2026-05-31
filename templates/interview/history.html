@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+
+{% block title %}Interview History - PrepAI Pro{% endblock %}
+{% block page_title %}Interview Sessions Log{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="premium-card">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h5 class="fw-bold mb-0"><i class="bi bi-clock-history text-primary me-2"></i>Past Mock Sessions</h5>
+                <a href="{{ url_for('interview.setup') }}" class="btn btn-premium btn-sm rounded-pill px-3">
+                    <i class="bi bi-plus-circle me-1"></i> Start Practice
+                </a>
+            </div>
+
+            {% if sessions %}
+            <div class="table-responsive">
+                <table class="table glass-table align-middle">
+                    <thead>
+                        <tr class="text-secondary small">
+                            <th>Session ID</th>
+                            <th>Category / Domain</th>
+                            <th>AI Evaluation Score</th>
+                            <th>Conduct Date</th>
+                            <th class="text-end">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for sess in sessions %}
+                        <tr>
+                            <td>
+                                <span class="fw-bold">#{{ sess.id }}</span>
+                            </td>
+                            <td>
+                                <span
+                                    class="badge bg-indigo-subtle text-primary border border-primary-subtle px-2.5 py-1.5 rounded-pill">
+                                    {{ sess.domain }}
+                                </span>
+                            </td>
+                            <td>
+                                <span
+                                    class="badge {% if sess.score >= 80 %}bg-success{% elif sess.score >= 60 %}bg-warning{% else %}bg-danger{% endif %} px-2.5 py-1.5 rounded-pill">
+                                    {{ sess.score }}%
+                                </span>
+                            </td>
+                            <td>
+                                <span class="text-secondary small">{{ sess.created_at.strftime('%b %d, %Y - %H:%M')
+                                    }}</span>
+                            </td>
+                            <td class="text-end">
+                                <a href="{{ url_for('interview.report', session_id=sess.id) }}"
+                                    class="btn btn-outline-secondary btn-sm rounded-pill px-3">
+                                    <i class="bi bi-eye-fill me-1"></i> Review Scores
+                                </a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="text-center py-5 text-secondary">
+                <i class="bi bi-chat-quote fs-1 mb-3 d-block"></i>
+                <p class="mb-3">You have not conducted any AI mock interviews yet.</p>
+                <a href="{{ url_for('interview.setup') }}" class="btn btn-premium rounded-pill px-4">
+                    Configure Mock Session
+                </a>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

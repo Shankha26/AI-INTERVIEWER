@@ -1,0 +1,226 @@
+{% extends "base.html" %}
+
+{% block title %}Admin Panel - PrepAI Pro{% endblock %}
+{% block page_title %}Administrative Panel{% endblock %}
+
+{% block content %}
+<!-- System-wide stats grid -->
+<div class="row mb-4 g-3">
+    <div class="col-6 col-lg-3">
+        <div class="premium-card text-center py-3">
+            <i class="bi bi-people-fill text-primary fs-3 mb-2"></i>
+            <h4 class="fw-bold mb-0">{{ total_users }}</h4>
+            <span class="text-secondary small">Total Candidates</span>
+        </div>
+    </div>
+    <div class="col-6 col-lg-3">
+        <div class="premium-card text-center py-3">
+            <i class="bi bi-file-earmark-bar-graph-fill text-info fs-3 mb-2"></i>
+            <h4 class="fw-bold mb-0">{{ total_resumes }}</h4>
+            <span class="text-secondary small">Resumes Scanned</span>
+        </div>
+    </div>
+    <div class="col-6 col-lg-3">
+        <div class="premium-card text-center py-3">
+            <i class="bi bi-chat-quote-fill text-success fs-3 mb-2"></i>
+            <h4 class="fw-bold mb-0">{{ total_interviews }}</h4>
+            <span class="text-secondary small">Interviews Conducted</span>
+        </div>
+    </div>
+    <div class="col-6 col-lg-3">
+        <div class="premium-card text-center py-3">
+            <i class="bi bi-award-fill text-warning fs-3 mb-2"></i>
+            <h4 class="fw-bold mb-0">{{ total_quizzes }}</h4>
+            <span class="text-secondary small">Quizzes Taken</span>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-12">
+        <div class="premium-card">
+            <!-- Tabs Navigation -->
+            <ul class="nav nav-tabs border-bottom mb-4" id="adminTab" role="tablist">
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link active fw-bold text-indigo" id="users-tab" data-bs-toggle="tab" data-bs-target="#users-pane" type="button" role="tab">Manage Candidates</button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link fw-bold text-indigo" id="q-add-tab" data-bs-toggle="tab" data-bs-target="#q-add-pane" type="button" role="tab">Add Question</button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link fw-bold text-indigo" id="q-bank-tab" data-bs-toggle="tab" data-bs-target="#q-bank-pane" type="button" role="tab">Question Bank</button>
+                </li>
+            </ul>
+            
+            <div class="tab-content text-secondary small" id="adminTabContent">
+                <!-- 1. Manage Users -->
+                <div class="tab-pane fade show active" id="users-pane" role="tabpanel">
+                    <div class="table-responsive">
+                        <table class="table glass-table align-middle">
+                            <thead>
+                                <tr class="text-secondary small">
+                                    <th>ID</th>
+                                    <th>Name</th>
+                                    <th>Email</th>
+                                    <th>Branch / College</th>
+                                    <th>Status</th>
+                                    <th class="text-end">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for u in users %}
+                                    <tr>
+                                        <td><span class="fw-bold">#{{ u.id }}</span></td>
+                                        <td>
+                                            <div class="d-flex align-items-center gap-2">
+                                                <i class="bi bi-person-circle fs-5 text-indigo"></i>
+                                                <span class="fw-semibold">{{ u.name }}</span>
+                                            </div>
+                                        </td>
+                                        <td><span>{{ u.email }}</span></td>
+                                        <td>
+                                            <span class="text-secondary small d-block">{{ u.branch or 'N/A' }}</span>
+                                            <span class="text-white-50 small">{{ u.college or 'N/A' }}</span>
+                                        </td>
+                                        <td>
+                                            <span class="badge {% if u.is_admin %}bg-success{% else %}bg-secondary{% endif %}">
+                                                {% if u.is_admin %}Admin{% else %}Candidate{% endif %}
+                                            </span>
+                                        </td>
+                                        <td class="text-end">
+                                            {% if current_user.id != u.id %}
+                                                <form action="{{ url_for('admin.delete_user', user_id=u.id) }}" method="POST" class="d-inline" onsubmit="return confirm('Are you sure you want to delete this user profile? This action will purge all their resumes, interviews, and scores!')">
+                                                    <button type="submit" class="btn btn-outline-danger btn-sm rounded-pill px-3">
+                                                        <i class="bi bi-trash-fill"></i> Delete
+                                                    </button>
+                                                </form>
+                                            {% else %}
+                                                <span class="text-white-50 small"><i class="bi bi-shield-fill-check me-1"></i>Self Account</span>
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                
+                <!-- 2. Add Question Form -->
+                <div class="tab-pane fade" id="q-add-pane" role="tabpanel">
+                    <form action="{{ url_for('admin.add_question') }}" method="POST" class="p-3 border rounded-4 bg-body-tertiary">
+                        {{ form.csrf_token }}
+                        
+                        <div class="row mb-3">
+                            <div class="col-md-4">
+                                <label for="subjectSelect" class="form-label fw-semibold">Subject Name</label>
+                                {{ form.subject(class="form-select form-control-premium") }}
+                            </div>
+                            
+                            <div class="col-md-4">
+                                <label for="categorySelect" class="form-label fw-semibold">Subject Category</label>
+                                {{ form.category(class="form-select form-control-premium") }}
+                            </div>
+                            
+                            <div class="col-md-4">
+                                <label for="difficultySelect" class="form-label fw-semibold">Difficulty Level</label>
+                                {{ form.difficulty(class="form-select form-control-premium") }}
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="qText" class="form-label fw-semibold">Question Text Prompt</label>
+                            {{ form.question_text(class="form-control form-control-premium", rows="3", placeholder="Type the question content here...") }}
+                        </div>
+                        
+                        <div class="row g-3 mb-3">
+                            <div class="col-md-6">
+                                <label for="optA" class="form-label fw-semibold">Option A</label>
+                                {{ form.option_a(class="form-control form-control-premium", placeholder="Option A text") }}
+                            </div>
+                            <div class="col-md-6">
+                                <label for="optB" class="form-label fw-semibold">Option B</label>
+                                {{ form.option_b(class="form-control form-control-premium", placeholder="Option B text") }}
+                            </div>
+                            <div class="col-md-6">
+                                <label for="optC" class="form-label fw-semibold">Option C</label>
+                                {{ form.option_c(class="form-control form-control-premium", placeholder="Option C text") }}
+                            </div>
+                            <div class="col-md-6">
+                                <label for="optD" class="form-label fw-semibold">Option D</label>
+                                {{ form.option_d(class="form-control form-control-premium", placeholder="Option D text") }}
+                            </div>
+                        </div>
+                        
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="correctOpt" class="form-label fw-semibold">Correct Option Key</label>
+                                {{ form.correct_option(class="form-select form-control-premium") }}
+                            </div>
+                        </div>
+                        
+                        <div class="mb-4">
+                            <label for="explanationText" class="form-label fw-semibold">Solution Explanation</label>
+                            {{ form.explanation(class="form-control form-control-premium", rows="2", placeholder="Step-by-step logic sheet to explain correct answer...") }}
+                        </div>
+                        
+                        <button type="submit" class="btn btn-premium px-4">
+                            <i class="bi bi-file-earmark-plus-fill me-2"></i>Add to Question Bank
+                        </button>
+                    </form>
+                </div>
+                
+                <!-- 3. Question Bank List -->
+                <div class="tab-pane fade" id="q-bank-pane" role="tabpanel">
+                    {% if questions %}
+                        <div class="table-responsive">
+                            <table class="table glass-table align-middle">
+                                <thead>
+                                    <tr class="text-secondary small">
+                                        <th>ID</th>
+                                        <th>Subject (Difficulty)</th>
+                                        <th>Question Text</th>
+                                        <th>Answer Key</th>
+                                        <th class="text-end">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for q in questions %}
+                                        <tr>
+                                            <td><span class="fw-bold">#{{ q.id }}</span></td>
+                                            <td>
+                                                <span class="badge bg-indigo-subtle text-primary border border-primary-subtle px-2 py-1 rounded-pill mb-1 d-block text-center">{{ q.subject }}</span>
+                                                <span class="badge bg-secondary-subtle text-secondary px-2 py-0.5 rounded-pill d-block text-center text-uppercase" style="font-size:0.65rem;">{{ q.difficulty }}</span>
+                                            </td>
+                                            <td>
+                                                <span class="text-secondary small text-truncate d-inline-block" style="max-width: 350px;" title="{{ q.question_text }}">
+                                                    {{ q.question_text }}
+                                                </span>
+                                            </td>
+                                            <td>
+                                                <span class="badge bg-success px-2 py-1.5 rounded-circle">{{ q.correct_option }}</span>
+                                            </td>
+                                            <td class="text-end">
+                                                <form action="{{ url_for('admin.delete_question', q_id=q.id) }}" method="POST" class="d-inline" onsubmit="return confirm('Are you sure you want to remove this question from the bank?')">
+                                                    <button type="submit" class="btn btn-outline-danger btn-sm rounded-circle p-1.5" title="Delete Question">
+                                                        <i class="bi bi-trash-fill px-0.5"></i>
+                                                    </button>
+                                                </form>
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <div class="text-center py-5 text-secondary">
+                            <i class="bi bi-file-earmark-lock fs-1 mb-3 d-block text-white-50"></i>
+                            <h6 class="fw-bold">Question Bank Empty</h6>
+                            <p class="small mb-0">Select 'Add Question' above to seed MCQs into the placement database bank.</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,109 @@
+{% extends "base.html" %}
+
+{% block title %}Study Plans - PrepAI Pro{% endblock %}
+{% block page_title %}AI Study Plans{% endblock %}
+
+{% block content %}
+<div class="row">
+    <!-- Left Column: Settings Form -->
+    <div class="col-lg-4 mb-4">
+        <div class="premium-card">
+            <h5 class="fw-bold mb-3"><i class="bi bi-calendar2-range-fill text-primary me-2"></i>Configure Plan</h5>
+            <p class="text-secondary small mb-4">Generate an adaptive study schedule. Our AI analyzes your latest mock and aptitude results to design custom daily milestones.</p>
+            
+            <form action="{{ url_for('career.study_plan') }}" method="POST" id="planForm">
+                {{ form.csrf_token }}
+                
+                <div class="mb-3">
+                    <label for="plan_type" class="form-label fw-semibold text-secondary">Timeline Length</label>
+                    {{ form.plan_type(class="form-select form-control-premium") }}
+                </div>
+                
+                <div class="mb-4">
+                    <label for="weak_topics" class="form-label fw-semibold text-secondary">Focus Areas / Weak Topics</label>
+                    {{ form.weak_topics(class="form-control form-control-premium", rows="4", placeholder="e.g. Normalization, Dynamic Programming, speech fluency...") }}
+                    {% if form.weak_topics.errors %}
+                        <div class="text-danger small mt-1">{% for error in form.weak_topics.errors %}{{ error }}{% endfor %}</div>
+                    {% endif %}
+                </div>
+                
+                <button type="submit" class="btn btn-premium w-100">
+                    <i class="bi bi-calendar-plus-fill me-2"></i>Build Schedule
+                </button>
+            </form>
+        </div>
+    </div>
+    
+    <!-- Right Column: Active plan output -->
+    <div class="col-lg-8">
+        {% if latest_plan %}
+            <div class="premium-card mb-4">
+                <div class="d-flex justify-content-between align-items-center mb-4 pb-2 border-bottom">
+                    <h5 class="fw-bold mb-0 text-primary">
+                        <i class="bi bi-calendar-check-fill me-2"></i>Active {{ latest_plan.plan_type }} Schedule
+                    </h5>
+                    <span class="badge bg-indigo-subtle text-primary border border-primary-subtle px-3 py-1.5 rounded-pill small">
+                        Generated {{ latest_plan.created_at.strftime('%b %d, %Y') }}
+                    </span>
+                </div>
+                
+                <div class="study-plan-markdown text-secondary small" style="line-height: 1.7; white-space: pre-line;">
+                    {{ latest_plan.plan_content }}
+                </div>
+            </div>
+            
+            {% if plans | length > 1 %}
+                <div class="premium-card">
+                    <h6 class="fw-bold text-secondary mb-3">Previous Blueprints History</h6>
+                    <div class="d-flex flex-column gap-2">
+                        {% for pl in plans[1:4] %}
+                            <div class="p-3 border rounded-4 d-flex justify-content-between align-items-center bg-body-tertiary">
+                                <div>
+                                    <h6 class="fw-bold mb-1 text-secondary">{{ pl.plan_type }} study plan</h6>
+                                    <small class="text-white-50">Scored on {{ pl.created_at.strftime('%b %d, %Y') }}</small>
+                                </div>
+                                <!-- In standard view we only print the latest active plan. 
+                                     They can refresh or submit another form to replace the view. -->
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            {% endif %}
+        {% else %}
+            <div class="premium-card text-center py-5 text-secondary">
+                <i class="bi bi-calendar2-range fs-1 mb-3 d-block text-white-50"></i>
+                <h5 class="fw-bold">No Active Study Blueprint</h5>
+                <p class="small mb-0">Fill out your weak topics and timeline parameters on the left to trigger a customized day-by-day scheduler from Gemini AI!</p>
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Modal Loading Overlay -->
+<div class="modal fade" id="loadingModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content glass-card border-0 p-4 text-center">
+            <div class="modal-body py-4">
+                <div class="spinner-border text-indigo fs-3 mb-3" style="width: 3rem; height: 3rem;" role="status"></div>
+                <h5 class="fw-bold mb-2">Generating Study Blueprint...</h5>
+                <p class="text-secondary small mb-0">Gemini AI is parsing your historical score gaps and structuring day-by-day tasks. Please do not refresh.</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const form = document.getElementById('planForm');
+    const loadingModal = new bootstrap.Modal(document.getElementById('loadingModal'));
+    
+    if (form) {
+        form.addEventListener('submit', () => {
+            loadingModal.show();
+        });
+    }
+});
+</script>
+{% endblock %}

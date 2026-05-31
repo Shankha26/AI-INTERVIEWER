@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+
+{% block title %}Smart Recommendations - PrepAI Pro{% endblock %}
+{% block page_title %}Candidate Recommendation Feed{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="premium-card">
+            <h5 class="fw-bold mb-4"><i class="bi bi-lightbulb-fill text-warning me-2"></i>My Recommendation Feed</h5>
+            
+            {% if recommendations %}
+                <div class="d-flex flex-column gap-4">
+                    {% for rec in recommendations %}
+                        <div class="p-4 border rounded-4 bg-body-tertiary">
+                            <div class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom">
+                                <h6 class="fw-bold text-indigo mb-0">Advisory Sheet #{{ rec.id }}</h6>
+                                <span class="badge bg-indigo-subtle text-primary border border-primary-subtle px-3 py-1 rounded-pill small">
+                                    {{ rec.created_at.strftime('%b %d, %Y') }}
+                                </span>
+                            </div>
+                            
+                            <div class="row g-3 text-secondary small">
+                                <div class="col-md-6 col-lg-3">
+                                    <div class="p-3 border rounded-3 bg-white h-100">
+                                        <h6 class="fw-bold text-primary mb-2"><i class="bi bi-bookmark-x me-2"></i>Topics to Improve</h6>
+                                        <p class="mb-0">{{ rec.topics_to_improve }}</p>
+                                    </div>
+                                </div>
+                                <div class="col-md-6 col-lg-3">
+                                    <div class="p-3 border rounded-3 bg-white h-100">
+                                        <h6 class="fw-bold text-success mb-2"><i class="bi bi-chat-left-text me-2"></i>Mock Targets</h6>
+                                        <p class="mb-0">{{ rec.interview_questions }}</p>
+                                    </div>
+                                </div>
+                                <div class="col-md-6 col-lg-3">
+                                    <div class="p-3 border rounded-3 bg-white h-100">
+                                        <h6 class="fw-bold text-warning mb-2"><i class="bi bi-journal-bookmark me-2"></i>Study Resources</h6>
+                                        <p class="mb-0" style="white-space: pre-line;">{{ rec.learning_resources }}</p>
+                                    </div>
+                                </div>
+                                <div class="col-md-6 col-lg-3">
+                                    <div class="p-3 border rounded-3 bg-white h-100">
+                                        <h6 class="fw-bold text-danger mb-2"><i class="bi bi-file-earmark-check me-2"></i>Aptitude Quiz Target</h6>
+                                        <p class="mb-0">{{ rec.practice_tests }}</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="text-center py-5 text-secondary">
+                    <i class="bi bi-lightbulb fs-1 mb-3 d-block text-white-50"></i>
+                    <h5 class="fw-bold">No Advice Generated Yet</h5>
+                    <p class="small mb-4">Your recommendation feed is built dynamically when you mapping career goals in our counseling system.</p>
+                    <a href="{{ url_for('career.counselor') }}" class="btn btn-premium rounded-pill px-4">
+                        Open AI Career Counselor
+                    </a>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

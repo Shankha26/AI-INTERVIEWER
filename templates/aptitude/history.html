@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+
+{% block title %}Aptitude History - PrepAI Pro{% endblock %}
+{% block page_title %}Aptitude Score Logs{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="premium-card">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h5 class="fw-bold mb-0"><i class="bi bi-clock-history text-primary me-2"></i>Past Exams</h5>
+                <a href="{{ url_for('aptitude.setup') }}" class="btn btn-premium btn-sm rounded-pill px-3">
+                    <i class="bi bi-plus-circle me-1"></i> New Quiz
+                </a>
+            </div>
+            
+            {% if results %}
+                <div class="table-responsive">
+                    <table class="table glass-table align-middle">
+                        <thead>
+                            <tr class="text-secondary small">
+                                <th>Exam ID</th>
+                                <th>Category Subject</th>
+                                <th>Score (Accuracy)</th>
+                                <th>Test Date</th>
+                                <th class="text-end">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for res in results %}
+                                <tr>
+                                    <td>
+                                        <span class="fw-bold">#{{ res.id }}</span>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-indigo-subtle text-primary border border-primary-subtle px-2.5 py-1.5 rounded-pill">
+                                            {{ res.category }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <span class="badge {% if res.score >= (res.total_questions * 0.8) %}bg-success{% elif res.score >= (res.total_questions * 0.6) %}bg-warning{% else %}bg-danger{% endif %} px-2.5 py-1.5 rounded-pill">
+                                            {{ res.score }} / {{ res.total_questions }} ({{ round(res.score / res.total_questions * 100) if res.total_questions > 0 else 0 }}%)
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <span class="text-secondary small">{{ res.created_at.strftime('%b %d, %Y - %H:%M') }}</span>
+                                    </td>
+                                    <td class="text-end">
+                                        <a href="{{ url_for('aptitude.result', result_id=res.id) }}" class="btn btn-outline-secondary btn-sm rounded-pill px-3">
+                                            <i class="bi bi-eye-fill me-1"></i> View Key
+                                        </a>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <div class="text-center py-5 text-secondary">
+                    <i class="bi bi-award fs-1 mb-3 d-block"></i>
+                    <p class="mb-3">You have not completed any aptitude training tests yet.</p>
+                    <a href="{{ url_for('aptitude.setup') }}" class="btn btn-premium rounded-pill px-4">
+                        Launch Training Test
+                    </a>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

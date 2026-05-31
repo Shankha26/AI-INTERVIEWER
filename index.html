@@ -1,0 +1,1801 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PrepAI Pro - Single-Page Placement Prep Portal</title>
+
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+
+    <!-- Google Fonts: Plus Jakarta Sans, Space Grotesk, Syne -->
+    <link
+        href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@500;700&family=Syne:wght@700;800&display=swap"
+        rel="stylesheet">
+
+    <style>
+        :root {
+            --bg-primary: #050714;
+            --bg-secondary: #0c0f24;
+            --text-primary: #f9fafb;
+            --text-secondary: #9ca3af;
+            --accent-color: #6366f1;
+            --accent-hover: #4f46e5;
+            --accent-gradient: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+            --border-color: rgba(255, 255, 255, 0.08);
+            --card-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+            --glass-bg: rgba(12, 15, 36, 0.65);
+            --glass-border: rgba(255, 255, 255, 0.06);
+            --primary-rgb: 99, 102, 241;
+            --success: #34d399;
+            --warning: #fbbf24;
+            --danger: #f87171;
+        }
+
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        h1,
+        h2,
+        h3,
+        h4,
+        h5,
+        h6,
+        .navbar-brand {
+            font-family: 'Space Grotesk', sans-serif;
+            font-weight: 700;
+        }
+
+        .hero-title,
+        h1.display-4,
+        h1.fw-bold {
+            font-family: 'Syne', sans-serif;
+            font-weight: 800;
+            letter-spacing: -0.02em;
+        }
+
+        /* Ambient Glow Spheres */
+        .glow-sphere {
+            position: absolute;
+            width: 500px;
+            height: 500px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(99, 102, 241, 0.12) 0%, rgba(0, 0, 0, 0) 70%);
+            z-index: -1;
+            pointer-events: none;
+            filter: blur(50px);
+        }
+
+        /* Navbar Style */
+        .navbar-landing {
+            background: rgba(5, 7, 20, 0.85);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .navbar-brand span {
+            background: var(--accent-gradient);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-weight: 800;
+        }
+
+        /* Nav links state */
+        .nav-link-item {
+            cursor: pointer;
+            transition: color 0.2s ease;
+        }
+
+        .nav-link-item:hover,
+        .nav-link-item.active {
+            color: var(--accent-color) !important;
+        }
+
+        /* Premium Cards */
+        .premium-card {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            padding: 2rem;
+            box-shadow: var(--card-shadow);
+            transition: transform 0.3s ease, border-color 0.3s ease;
+        }
+
+        .premium-card:hover {
+            transform: translateY(-3px);
+            border-color: rgba(var(--primary-rgb), 0.3);
+        }
+
+        .glass-card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid var(--glass-border);
+        }
+
+        /* Buttons */
+        .btn-premium {
+            background: var(--accent-gradient);
+            color: #ffffff;
+            font-weight: 600;
+            border: none;
+            border-radius: 25px;
+            padding: 0.75rem 2rem;
+            box-shadow: 0 4px 15px rgba(99, 102, 241, 0.3);
+            transition: all 0.3s ease;
+        }
+
+        .btn-premium:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(99, 102, 241, 0.45);
+            color: #ffffff;
+        }
+
+        .btn-outline-premium {
+            background: transparent;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            color: var(--text-primary);
+            font-weight: 600;
+            border-radius: 25px;
+            padding: 0.75rem 2rem;
+            transition: all 0.3s ease;
+        }
+
+        .btn-outline-premium:hover {
+            background: rgba(255, 255, 255, 0.05);
+            border-color: rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
+        }
+
+        /* Form Premium Control */
+        .form-control-premium {
+            background-color: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 0.75rem 1.25rem;
+            color: var(--text-primary);
+            transition: all 0.2s;
+        }
+
+        .form-control-premium:focus {
+            background-color: var(--bg-secondary);
+            border-color: var(--accent-color);
+            box-shadow: 0 0 0 4px rgba(var(--primary-rgb), 0.15);
+            color: var(--text-primary);
+        }
+
+        /* Sections Navigation switcher */
+        .app-section {
+            display: none;
+            padding-top: 6rem;
+            animation: fadeIn 0.4s ease forwards;
+        }
+
+        .app-section.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(15px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Circular SVG Meter */
+        .progress-ring {
+            position: relative;
+            width: 120px;
+            height: 120px;
+        }
+
+        .progress-ring circle {
+            fill: none;
+            stroke-width: 10;
+            transform: rotate(-90deg);
+            transform-origin: 50% 50%;
+            transition: stroke-dashoffset 0.8s ease;
+        }
+
+        .progress-ring-bg {
+            stroke: var(--border-color);
+        }
+
+        .progress-ring-bar {
+            stroke: url(#accentGradientSVG);
+            stroke-linecap: round;
+        }
+
+        .progress-ring-text {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 1.5rem;
+            font-weight: 800;
+        }
+
+        /* Waveform Canva overlay */
+        .webcam-container {
+            position: relative;
+            border-radius: 16px;
+            overflow: hidden;
+            background: #000;
+            aspect-ratio: 16/9;
+        }
+
+        .webcam-feed {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .camera-overlay {
+            position: absolute;
+            bottom: 1rem;
+            left: 1rem;
+            background: rgba(0, 0, 0, 0.6);
+            color: #fff;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        /* Timeline list style */
+        .activity-timeline {
+            position: relative;
+            padding-left: 2rem;
+            border-left: 2px dashed var(--border-color);
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .activity-badge {
+            position: absolute;
+            left: -2.75rem;
+            top: 0.25rem;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background: var(--bg-secondary);
+            border: 2px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--accent-color);
+        }
+
+        /* 3D Character Illustration Area */
+        .illustration-container {
+            position: relative;
+            width: 100%;
+            max-width: 500px;
+            margin: 0 auto;
+            aspect-ratio: 1;
+        }
+
+        #canvas-3d-container {
+            width: 100%;
+            height: 100%;
+            border-radius: 24px;
+        }
+
+        /* Floating Widgets base */
+        .float-widget {
+            position: absolute;
+            background: rgba(12, 15, 36, 0.55);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 16px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.6);
+            pointer-events: none;
+            transition: transform 0.1s ease-out;
+        }
+
+        /* 1. Profile Widget */
+        .float-profile-widget {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 14px;
+            width: 120px;
+        }
+
+        .widget-profile-avatar {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            border: 1.5px solid rgba(255, 255, 255, 0.3);
+            background: linear-gradient(135deg, #6366f1 0%, #a78bfa 100%);
+        }
+
+        .widget-profile-lines {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .widget-line {
+            height: 4px;
+            border-radius: 2px;
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .line-short {
+            width: 50%;
+        }
+
+        .line-long {
+            width: 90%;
+        }
+
+        /* 2. Network Widget */
+        .float-network-widget {
+            width: 60px;
+            height: 60px;
+            padding: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+        }
+
+        .widget-network-svg {
+            width: 100%;
+            height: 100%;
+        }
+
+        /* 3. AI Chip Widget */
+        .float-ai-widget {
+            width: 70px;
+            height: 70px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 18px;
+            overflow: visible;
+        }
+
+        .widget-ai-chip {
+            width: 36px;
+            height: 36px;
+            background: #6366f1;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            color: #ffffff;
+            font-size: 1rem;
+            box-shadow: 0 0 20px rgba(99, 102, 241, 0.6);
+            z-index: 2;
+        }
+
+        .widget-ai-lines {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+        }
+
+        /* 4. Code lines Widget */
+        .float-code-widget {
+            padding: 12px 14px;
+            width: 130px;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .widget-code-line {
+            height: 5px;
+            border-radius: 2.5px;
+        }
+
+        .col-purple {
+            width: 70%;
+            background: #c084fc;
+        }
+
+        .col-blue {
+            width: 85%;
+            background: #60a5fa;
+        }
+
+        .col-green {
+            width: 50%;
+            background: #34d399;
+        }
+
+        /* 5. Chart Widget */
+        .float-chart-widget {
+            padding: 12px;
+            width: 100px;
+            height: 75px;
+            display: flex;
+            align-items: flex-end;
+            justify-content: space-around;
+            position: relative;
+        }
+
+        .widget-chart-bars {
+            display: flex;
+            align-items: flex-end;
+            gap: 8px;
+            width: 100%;
+            height: 100%;
+            padding-bottom: 2px;
+        }
+
+        .widget-bar {
+            width: 12px;
+            border-radius: 3px 3px 0 0;
+            background: linear-gradient(to top, rgba(99, 102, 241, 0.2), #6366f1);
+        }
+
+        .bar-1 {
+            height: 40%;
+        }
+
+        .bar-2 {
+            height: 65%;
+        }
+
+        .bar-3 {
+            height: 90%;
+        }
+
+        .widget-chart-line {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+        }
+
+        /* Sparkles */
+        .sparkle {
+            position: absolute;
+            color: #22d3ee;
+            font-size: 1.2rem;
+            filter: drop-shadow(0 0 8px #22d3ee);
+            animation: twinkle 3s infinite alternate ease-in-out;
+        }
+
+        .sparkle-1 {
+            top: 55%;
+            left: 5%;
+            animation-delay: 0s;
+        }
+
+        .sparkle-2 {
+            bottom: 15%;
+            right: 20%;
+            animation-delay: 1.5s;
+        }
+
+        @keyframes twinkle {
+            0% {
+                opacity: 0.2;
+                transform: scale(0.8) rotate(0deg);
+            }
+
+            100% {
+                opacity: 1;
+                transform: scale(1.2) rotate(15deg);
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- SVG for gradients -->
+    <svg style="width:0;height:0;position:absolute;" aria-hidden="true">
+        <linearGradient id="accentGradientSVG" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="#6366f1" />
+            <stop offset="100%" stop-color="#a78bfa" />
+        </linearGradient>
+    </svg>
+
+    <!-- Glow Spheres -->
+    <div class="glow-sphere" style="top: 5%; left: 10%;"></div>
+    <div class="glow-sphere"
+        style="top: 45%; right: 10%; background: radial-gradient(circle, rgba(167, 139, 250, 0.1) 0%, rgba(0,0,0,0) 70%);">
+    </div>
+
+    <!-- Navigation Header -->
+    <nav class="navbar navbar-expand-lg navbar-dark navbar-landing fixed-top">
+        <div class="container">
+            <a class="navbar-brand d-flex align-items-center gap-2 nav-link-item" onclick="switchSection('landing')">
+                <i class="bi bi-robot text-primary fs-3"></i>
+                <span>PrepAI Pro</span>
+            </a>
+
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarText">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <div class="collapse navbar-collapse" id="navbarText">
+                <ul class="navbar-nav mx-auto mb-2 mb-lg-0 gap-3">
+                    <li class="nav-item"><a class="nav-link nav-link-item text-white-50 active" id="nav-landing"
+                            onclick="switchSection('landing')">Home</a></li>
+                    <li class="nav-item"><a class="nav-link nav-link-item text-white-50" id="nav-dashboard"
+                            onclick="switchSection('dashboard')">Dashboard</a></li>
+                    <li class="nav-item"><a class="nav-link nav-link-item text-white-50" id="nav-resume"
+                            onclick="switchSection('resume')">Resume Analyzer</a></li>
+                    <li class="nav-item"><a class="nav-link nav-link-item text-white-50" id="nav-interview"
+                            onclick="switchSection('interview')">Mock Interviews</a></li>
+                    <li class="nav-item"><a class="nav-link nav-link-item text-white-50" id="nav-aptitude"
+                            onclick="switchSection('aptitude')">Aptitude Tests</a></li>
+                    <li class="nav-item"><a class="nav-link nav-link-item text-white-50" id="nav-counselor"
+                            onclick="switchSection('counselor')">Career Counselor</a></li>
+                </ul>
+                <div class="d-flex align-items-center gap-3">
+                    <button class="text-white-50 bg-transparent border-0 fw-semibold"
+                        onclick="switchSection('login')">Login</button>
+                    <button class="btn btn-premium btn-sm px-4 py-2"
+                        onclick="switchSection('register')">Register</button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- ================= 1. LANDING/HOME PANEL ================= -->
+    <section id="sect-landing" class="app-section active">
+        <div class="container py-5">
+            <div class="row align-items-center py-4">
+                <!-- Left Hand Text Content -->
+                <div class="col-lg-6 mb-5 mb-lg-0 text-start">
+                    <span
+                        class="badge bg-indigo-subtle text-primary border border-primary-subtle px-3 py-2 rounded-pill fw-bold mb-4"
+                        style="background: rgba(99, 102, 241, 0.15);">
+                        <i class="bi bi-cpu-fill me-2"></i>AI-Powered Placement Preparation
+                    </span>
+
+                    <h1 class="fw-bold mb-3 display-4 lh-tight"
+                        style="font-weight: 800; font-size: 3.2rem; letter-spacing: -0.02em;">
+                        Prepare Smarter.<br>Get Placed Faster.
+                    </h1>
+
+                    <p class="text-secondary fs-5 mb-5" style="line-height: 1.6; max-width: 500px;">
+                        AI Mock Interviews, Resume Analysis, Aptitude Tests and Personalized Study Plans – Everything
+                        you need to crack your dream job.
+                    </p>
+
+                    <div class="d-flex flex-wrap gap-3">
+                        <button class="btn btn-premium" onclick="switchSection('register')">
+                            Get Started Free
+                        </button>
+                        <button class="btn btn-outline-premium" onclick="switchSection('login')">
+                            Explore Features
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Right Hand 3D Character Illustration (WebGL Three.js canvas + absolute floating widgets) -->
+                <div class="col-lg-6">
+                    <div class="illustration-container">
+                        <!-- 3D Canvas mounting point -->
+                        <div id="canvas-3d-container"></div>
+
+                        <!-- Floating glassmorphism cards matching mockup -->
+                        <!-- Card 1: Top-Center User Profile Card -->
+                        <div class="float-widget float-profile-widget" style="top: 5%; right: 25%;">
+                            <div class="widget-profile-avatar"></div>
+                            <div class="widget-profile-lines">
+                                <div class="widget-line line-short"></div>
+                                <div class="widget-line line-long"></div>
+                            </div>
+                        </div>
+
+                        <!-- Card 2: Top-Right Network Mesh Card -->
+                        <div class="float-widget float-network-widget" style="top: 15%; right: 2%;">
+                            <svg class="widget-network-svg" viewBox="0 0 80 80">
+                                <circle cx="20" cy="40" r="4" fill="#a78bfa" />
+                                <circle cx="60" cy="20" r="4" fill="#6366f1" />
+                                <circle cx="60" cy="60" r="4" fill="#6366f1" />
+                                <circle cx="40" cy="40" r="4.5" fill="#f43f5e" />
+                                <line x1="20" y1="40" x2="40" y2="40" stroke="rgba(255,255,255,0.15)"
+                                    stroke-width="1.5" />
+                                <line x1="40" y1="40" x2="60" y2="20" stroke="rgba(255,255,255,0.15)"
+                                    stroke-width="1.5" />
+                                <line x1="40" y1="40" x2="60" y2="60" stroke="rgba(255,255,255,0.15)"
+                                    stroke-width="1.5" />
+                            </svg>
+                        </div>
+
+                        <!-- Card 3: Middle-Left Glowing AI Chip Card -->
+                        <div class="float-widget float-ai-widget" style="top: 25%; left: 8%;">
+                            <div class="widget-ai-chip">
+                                <span>AI</span>
+                            </div>
+                            <!-- Little branching lines -->
+                            <svg class="widget-ai-lines" viewBox="0 0 60 60">
+                                <path d="M10,30 L25,30 M50,30 L35,30 M30,10 L30,25 M30,50 L30,35"
+                                    stroke="rgba(6, 182, 212, 0.4)" stroke-width="2" stroke-linecap="round" />
+                            </svg>
+                        </div>
+
+                        <!-- Card 4: Bottom-Left Document/Code Lines Card -->
+                        <div class="float-widget float-code-widget" style="bottom: 22%; left: 2%;">
+                            <div class="widget-code-line col-purple"></div>
+                            <div class="widget-code-line col-blue"></div>
+                            <div class="widget-code-line col-green"></div>
+                        </div>
+
+                        <!-- Card 5: Bottom-Right Graph Card -->
+                        <div class="float-widget float-chart-widget" style="bottom: 12%; right: 8%;">
+                            <div class="widget-chart-bars">
+                                <div class="widget-bar bar-1"></div>
+                                <div class="widget-bar bar-2"></div>
+                                <div class="widget-bar bar-3"></div>
+                            </div>
+                            <svg class="widget-chart-line" viewBox="0 0 60 40">
+                                <path d="M 5,35 Q 25,15 55,5" fill="none" stroke="#6366f1" stroke-width="3"
+                                    stroke-linecap="round" />
+                                <circle cx="5" cy="35" r="3" fill="#6366f1" />
+                                <circle cx="55" cy="5" r="3" fill="#6366f1" />
+                            </svg>
+                        </div>
+
+                        <!-- Small Sparkles -->
+                        <div class="sparkle sparkle-1"><i class="bi bi-asterisk"></i></div>
+                        <div class="sparkle sparkle-2"><i class="bi bi-asterisk"></i></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ================= MOCK LOGIN SECTION ================= -->
+    <section id="sect-login" class="app-section">
+        <div class="container py-5">
+            <div class="row justify-content-center">
+                <div class="col-md-5">
+                    <div class="premium-card glass-card p-4 p-md-5 text-center">
+                        <i class="bi bi-shield-lock-fill text-primary fs-1 mb-3 d-block"></i>
+                        <h4 class="fw-bold mb-1">Account Login</h4>
+                        <p class="text-secondary small mb-4">Access your placement dashboard simulator</p>
+
+                        <div class="mb-3 text-start">
+                            <label class="form-label fw-semibold text-secondary">Email Address</label>
+                            <input type="email" class="form-control form-control-premium" value="candidate@prepai.pro"
+                                id="loginEmail">
+                        </div>
+
+                        <div class="mb-4 text-start">
+                            <label class="form-label fw-semibold text-secondary">Password</label>
+                            <input type="password" class="form-control form-control-premium"
+                                value="candidatepassword123" id="loginPassword">
+                        </div>
+
+                        <button class="btn btn-premium w-100 mb-3" onclick="switchSection('dashboard')">
+                            <i class="bi bi-box-arrow-in-right me-2"></i>Sign In (Demo)
+                        </button>
+
+                        <p class="mb-0 text-secondary small">New candidate? <a href="#"
+                                class="text-indigo fw-bold text-decoration-none"
+                                onclick="switchSection('register')">Create Account</a></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ================= MOCK REGISTER SECTION ================= -->
+    <section id="sect-register" class="app-section">
+        <div class="container py-5">
+            <div class="row justify-content-center">
+                <div class="col-md-5">
+                    <div class="premium-card glass-card p-4 p-md-5 text-center">
+                        <i class="bi bi-person-plus-fill text-primary fs-1 mb-3 d-block"></i>
+                        <h4 class="fw-bold mb-1">Create Account</h4>
+                        <p class="text-secondary small mb-4">Join PrepAI Pro Mock Placement Portal</p>
+
+                        <div class="mb-3 text-start">
+                            <label class="form-label fw-semibold text-secondary">Full Name</label>
+                            <input type="text" class="form-control form-control-premium" placeholder="John Doe">
+                        </div>
+                        <div class="mb-3 text-start">
+                            <label class="form-label fw-semibold text-secondary">Email Address</label>
+                            <input type="email" class="form-control form-control-premium"
+                                placeholder="name@college.edu">
+                        </div>
+                        <div class="mb-4 text-start">
+                            <label class="form-label fw-semibold text-secondary">Password</label>
+                            <input type="password" class="form-control form-control-premium"
+                                placeholder="Enter secure password">
+                        </div>
+
+                        <button class="btn btn-premium w-100 mb-3" onclick="switchSection('login')">
+                            <i class="bi bi-person-check-fill me-2"></i>Create Account
+                        </button>
+
+                        <p class="mb-0 text-secondary small">Already registered? <a href="#"
+                                class="text-indigo fw-bold text-decoration-none" onclick="switchSection('login')">Sign
+                                In</a></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ================= 2. DASHBOARD PANEL ================= -->
+    <section id="sect-dashboard" class="app-section">
+        <div class="container py-4">
+            <div class="row mb-4">
+                <div class="col-lg-8 mb-3 mb-lg-0">
+                    <div class="premium-card text-white border-0 h-100 p-4 d-flex flex-column justify-content-center"
+                        style="background: linear-gradient(135deg, #1e1b4b 0%, #311050 100%);">
+                        <h3 class="fw-bold mb-2">Hello, Demo Candidate!</h3>
+                        <p class="text-white-50 mb-0">Review placement readiness statistics. Take AI Mocks or Resume
+                            tests to update calculations in real-time.</p>
+                    </div>
+                </div>
+
+                <div class="col-lg-4">
+                    <div
+                        class="premium-card text-center d-flex flex-column align-items-center justify-content-center h-100 py-4">
+                        <h6 class="fw-bold text-secondary mb-2">Placement Readiness Score</h6>
+                        <div class="progress-ring mb-2">
+                            <svg width="120" height="120">
+                                <circle class="progress-ring-bg" cx="60" cy="60" r="50"></circle>
+                                <circle class="progress-ring-bar" cx="60" cy="60" r="50" stroke-dasharray="314.16"
+                                    stroke-dashoffset="62.83" id="dbReadinessRing"></circle> <!-- 80% -->
+                            </svg>
+                            <div class="progress-ring-text" id="dbReadinessText">80%</div>
+                        </div>
+                        <span class="badge bg-success px-3 py-1 rounded-pill" id="dbReadinessStatus">Ready</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Stats cards -->
+            <div class="row mb-4 g-3">
+                <div class="col-6 col-lg-3" style="cursor: pointer;" onclick="switchSection('interview')">
+                    <div class="premium-card text-center py-4">
+                        <i class="bi bi-chat-quote-fill text-primary fs-3 mb-2"></i>
+                        <h4 class="fw-bold mb-1" id="statInterviews">4</h4>
+                        <span class="text-secondary small">Mock Interviews</span>
+                    </div>
+                </div>
+                <div class="col-6 col-lg-3" style="cursor: pointer;" onclick="switchSection('interview')">
+                    <div class="premium-card text-center py-4">
+                        <i class="bi bi-graph-up-arrow text-success fs-3 mb-2"></i>
+                        <h4 class="fw-bold mb-1" id="statInterviewAvg">82%</h4>
+                        <span class="text-secondary small">Avg Interview Score</span>
+                    </div>
+                </div>
+                <div class="col-6 col-lg-3" style="cursor: pointer;" onclick="switchSection('resume')">
+                    <div class="premium-card text-center py-4">
+                        <i class="bi bi-file-earmark-bar-graph text-info fs-3 mb-2"></i>
+                        <h4 class="fw-bold mb-1" id="statResumeScore">78%</h4>
+                        <span class="text-secondary small">Latest Resume ATS</span>
+                    </div>
+                </div>
+                <div class="col-6 col-lg-3" style="cursor: pointer;" onclick="switchSection('aptitude')">
+                    <div class="premium-card text-center py-4">
+                        <i class="bi bi-patch-question-fill text-warning fs-3 mb-2"></i>
+                        <h4 class="fw-bold mb-1" id="statAptitudeAvg">85%</h4>
+                        <span class="text-secondary small">Avg Aptitude Score</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Graphs & Timelines -->
+            <div class="row">
+                <div class="col-lg-8 mb-4">
+                    <div class="premium-card" style="min-height: 380px;">
+                        <h5 class="fw-bold mb-4"><i class="bi bi-bar-chart-line-fill text-primary me-2"></i>Performance
+                            Trends</h5>
+                        <div style="position: relative; height: 280px;">
+                            <canvas id="dashboardChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-lg-4 mb-4">
+                    <div class="premium-card h-100">
+                        <h5 class="fw-bold mb-4"><i class="bi bi-clock-history text-primary me-2"></i>Recent Activity
+                        </h5>
+                        <div class="activity-timeline">
+                            <div class="activity-item">
+                                <div class="activity-badge"><i class="bi bi-chat-dots text-success"></i></div>
+                                <div class="ms-3">
+                                    <h6 class="mb-0 fw-bold small text-primary">Mock Interview</h6>
+                                    <p class="mb-1 small text-secondary">Completed Python Technical Interview (Score:
+                                        82%)</p>
+                                    <small class="text-white-50 text-uppercase" style="font-size:0.65rem;">Today,
+                                        14:30</small>
+                                </div>
+                            </div>
+                            <div class="activity-item">
+                                <div class="activity-badge"><i class="bi bi-award text-warning"></i></div>
+                                <div class="ms-3">
+                                    <h6 class="mb-0 fw-bold small text-primary">Aptitude Test</h6>
+                                    <p class="mb-1 small text-secondary">Aptitude: Logical Reasoning (90%)</p>
+                                    <small class="text-white-50 text-uppercase" style="font-size:0.65rem;">Yesterday,
+                                        11:20</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ================= 3. RESUME ANALYZER PANEL ================= -->
+    <section id="sect-resume" class="app-section">
+        <div class="container py-4">
+            <div class="row justify-content-center" id="resumeUploadPanel">
+                <div class="col-lg-8">
+                    <div class="premium-card">
+                        <div class="text-center mb-4">
+                            <i class="bi bi-file-earmark-pdf-fill text-primary fs-1 mb-2"></i>
+                            <h4 class="fw-bold">ATS Resume Scanner</h4>
+                            <p class="text-secondary small">Scan your PDF file to analyze keyword coverage and
+                                formatting.</p>
+                        </div>
+
+                        <div class="border border-2 border-dashed border-secondary-subtle rounded-4 p-5 text-center mb-4 cursor-pointer"
+                            id="dropZone" style="background-color: var(--bg-primary);"
+                            onclick="triggerMockResumeScan()">
+                            <i class="bi bi-cloud-upload text-indigo fs-1 mb-3 d-block"></i>
+                            <h6 class="fw-bold mb-1">Drag and Drop PDF Resume here</h6>
+                            <span class="text-secondary small d-block mb-3">or click to upload sample PDF & run
+                                scanner</span>
+                            <div class="spinner-border text-primary d-none mt-2" id="resumeScannerSpinner"
+                                role="status"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Resume Scan Report Sheet -->
+            <div class="row d-none" id="resumeReportPanel">
+                <div class="col-lg-4 mb-4">
+                    <div
+                        class="premium-card text-center d-flex flex-column align-items-center justify-content-center h-100 py-4">
+                        <h6 class="fw-bold text-secondary mb-3">ATS Score</h6>
+                        <div class="progress-ring mb-3">
+                            <svg width="120" height="120">
+                                <circle class="progress-ring-bg" cx="60" cy="60" r="50"></circle>
+                                <circle class="progress-ring-bar" cx="60" cy="60" r="50" stroke-dasharray="314.16"
+                                    stroke-dashoffset="69.1" id="repAtsRing"></circle> <!-- 78% -->
+                            </svg>
+                            <div class="progress-ring-text" id="repAtsText">78%</div>
+                        </div>
+                        <span class="badge bg-warning px-3 py-1.5 rounded-pill">Moderate Match</span>
+                    </div>
+                </div>
+
+                <div class="col-lg-8 mb-4">
+                    <div class="premium-card h-100">
+                        <h5 class="fw-bold mb-4">ATS Recommendations</h5>
+                        <div class="row mb-3">
+                            <div class="col-md-6 mb-2">
+                                <div
+                                    class="p-3 border border-success-subtle rounded-4 h-100 bg-success-subtle bg-opacity-10 small">
+                                    <h6 class="fw-bold text-success mb-2"><i class="bi bi-check-circle me-1"></i>Core
+                                        Strengths</h6>
+                                    <ul class="mb-0 ps-3 text-secondary">
+                                        <li>Clear project description flow</li>
+                                        <li>Strong formatting consistency</li>
+                                    </ul>
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-2">
+                                <div
+                                    class="p-3 border border-danger-subtle rounded-4 h-100 bg-danger-subtle bg-opacity-10 small">
+                                    <h6 class="fw-bold text-danger mb-2"><i class="bi bi-x-circle me-1"></i>keyword Gaps
+                                    </h6>
+                                    <ul class="mb-0 ps-3 text-secondary">
+                                        <li>Missing Docker & AWS tools</li>
+                                        <li>Lack of performance metrics</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="d-flex flex-wrap gap-2 mt-3">
+                            <span
+                                class="badge bg-indigo-subtle text-primary border border-primary-subtle px-2 py-1.5 rounded-pill">Python</span>
+                            <span
+                                class="badge bg-indigo-subtle text-primary border border-primary-subtle px-2 py-1.5 rounded-pill">SQL</span>
+                            <span
+                                class="badge bg-indigo-subtle text-primary border border-primary-subtle px-2 py-1.5 rounded-pill">Flask</span>
+                        </div>
+
+                        <button class="btn btn-outline-secondary btn-sm mt-4 rounded-pill px-3"
+                            onclick="resetResumeUploader()">
+                            Upload Another
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ================= 4. AI MOCK INTERVIEW PANEL ================= -->
+    <section id="sect-interview" class="app-section">
+        <div class="container py-4">
+            <div class="row" id="interviewSessionPanel">
+                <div class="col-lg-3 mb-4">
+                    <div class="premium-card">
+                        <h6 class="fw-bold text-secondary mb-3">Interview Panel</h6>
+                        <div class="d-flex flex-column gap-2 small">
+                            <div class="p-2 border rounded-3 bg-body-secondary border-primary" id="qTrack-0">
+                                <span>Question 1</span>
+                            </div>
+                            <div class="p-2 border rounded-3 bg-body-tertiary" id="qTrack-1"><span>Question 2</span>
+                            </div>
+                            <div class="p-2 border rounded-3 bg-body-tertiary" id="qTrack-2"><span>Question 3</span>
+                            </div>
+                        </div>
+
+                        <div class="mt-4 small text-secondary">
+                            <p class="mb-1"><strong>Domain:</strong> Python Technical</p>
+                            <p class="mb-0"><strong>Format:</strong> Voice Camera Mock</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-lg-9">
+                    <div class="premium-card" style="min-height: 440px;">
+                        <h6 class="text-primary fw-bold mb-1" id="qIndexDisp">Question 1 of 3</h6>
+                        <h4 class="fw-bold mb-4" id="qTextDisp">Explain list comprehensions in Python and their
+                            performance advantages.</h4>
+
+                        <div class="row g-4 mb-4">
+                            <div class="col-md-7">
+                                <div class="webcam-container border shadow-sm">
+                                    <video id="demoWebcam" class="webcam-feed" autoplay muted playsinline></video>
+                                    <div class="camera-overlay d-none" id="demoRecOverlay">
+                                        <span class="spinner-grow spinner-grow-sm text-danger" role="status"></span>
+                                        <span class="fw-bold text-uppercase" style="font-size:0.75rem;">RECORDING
+                                            ANSWER</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-md-5 d-flex flex-column justify-content-between">
+                                <div
+                                    class="p-3 border rounded-4 bg-body-tertiary h-100 mb-3 d-flex flex-column align-items-center justify-content-center text-center">
+                                    <h6 class="fw-bold text-secondary mb-2">Voice Waves</h6>
+                                    <canvas id="demoVisualizer" class="rounded-3 w-100 bg-dark mb-3"
+                                        style="height: 70px;"></canvas>
+
+                                    <div class="d-flex gap-2">
+                                        <button class="btn btn-premium btn-sm rounded-pill px-3" id="demoRecordBtn"
+                                            onclick="toggleDemoRecording()">
+                                            <i class="bi bi-mic me-1"></i> Speak Answer
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="form-label fw-semibold text-secondary">Answer Transcript (Real-time Speech
+                                Output)</label>
+                            <textarea class="form-control form-control-premium" id="demoTranscriptText" rows="4"
+                                placeholder="Speak to transcribe..."></textarea>
+                        </div>
+
+                        <div class="d-flex justify-content-between align-items-center">
+                            <button class="btn btn-premium rounded-pill px-4 ms-auto" id="demoNextBtn"
+                                onclick="nextDemoQuestion()">
+                                Next Question <i class="bi bi-chevron-right ms-1"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Final Scorecard Report -->
+            <div class="row d-none" id="interviewScorePanel">
+                <div class="col-lg-4 mb-4">
+                    <div
+                        class="premium-card text-center d-flex flex-column align-items-center justify-content-center h-100 py-5">
+                        <h5 class="fw-bold text-secondary mb-4">Mock Score</h5>
+                        <div class="progress-ring mb-4" style="width: 150px; height: 150px;">
+                            <svg width="150" height="150">
+                                <circle class="progress-ring-bg" cx="75" cy="75" r="65" stroke-width="12"></circle>
+                                <circle class="progress-ring-bar" cx="75" cy="75" r="65" stroke-width="12"
+                                    stroke-dasharray="408.4" stroke-dashoffset="73.5" id="repIntRing"></circle>
+                                <!-- 82% -->
+                            </svg>
+                            <div class="progress-ring-text" style="font-size: 2rem;" id="repIntText">82%</div>
+                        </div>
+                        <span
+                            class="badge bg-indigo-subtle text-primary border border-primary-subtle px-3 py-1.5 rounded-pill fw-bold">Python
+                            Technical</span>
+                    </div>
+                </div>
+
+                <div class="col-lg-8 mb-4">
+                    <div class="premium-card h-100">
+                        <h5 class="fw-bold mb-3">AI Evaluation Report</h5>
+                        <p class="text-secondary small mb-4">Strong conceptual explanation of syntactical layouts.
+                            Pacing was appropriate, and grammar structures were clean. Practice articulating edge-cases.
+                        </p>
+
+                        <h6 class="fw-bold text-primary mb-3">Communication Scorecard</h6>
+                        <div class="row g-2 text-center small">
+                            <div class="col-4">
+                                <div class="p-2 border rounded bg-body-tertiary"><span
+                                        class="text-secondary d-block">Fluency</span>
+                                    <h6 class="fw-bold text-indigo mb-0">80%</h6>
+                                </div>
+                            </div>
+                            <div class="col-4">
+                                <div class="p-2 border rounded bg-body-tertiary"><span
+                                        class="text-secondary d-block">Confidence</span>
+                                    <h6 class="fw-bold text-indigo mb-0">85%</h6>
+                                </div>
+                            </div>
+                            <div class="col-4">
+                                <div class="p-2 border rounded bg-body-tertiary"><span
+                                        class="text-secondary d-block">Accuracy</span>
+                                    <h6 class="fw-bold text-success mb-0">82%</h6>
+                                </div>
+                            </div>
+                        </div>
+
+                        <button class="btn btn-premium mt-4 rounded-pill px-4" onclick="resetDemoInterview()">
+                            Practice Another
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ================= 5. APTITUDE PANEL ================= -->
+    <section id="sect-aptitude" class="app-section">
+        <div class="container py-4">
+            <div class="row" id="aptitudeQuizPanel">
+                <div class="col-lg-3 mb-4">
+                    <div class="premium-card text-center mb-4 py-3">
+                        <h6 class="fw-bold text-secondary mb-1">Time Remaining</h6>
+                        <h3 class="fw-bold text-danger mb-0" id="aptTimer">09:59</h3>
+                    </div>
+
+                    <div class="premium-card text-center">
+                        <h6 class="fw-bold text-secondary mb-3">Quiz checklist</h6>
+                        <div class="d-flex flex-wrap gap-2 justify-content-center">
+                            <button class="btn btn-success rounded-circle" id="aptCheck-0"
+                                style="width:36px;height:36px;padding:0;">1</button>
+                            <button class="btn btn-outline-secondary rounded-circle" id="aptCheck-1"
+                                style="width:36px;height:36px;padding:0;">2</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-lg-9">
+                    <div class="premium-card" style="min-height: 400px;">
+                        <h6 class="text-primary fw-bold mb-1" id="aptIndexDisp">Question 1 of 2</h6>
+                        <h4 class="fw-bold mb-4" id="aptTextDisp">A train 120 m long passes a telegraph post in 6
+                            seconds. Find the speed of the train in km/hr.</h4>
+
+                        <div class="d-flex flex-column gap-3 mb-4">
+                            <label class="aptitude-option-card" id="optLabel-A" onclick="chooseAptOption('A')">
+                                <input class="form-check-input" type="radio" name="aptOpts" id="aptOpt-A" value="A">
+                                <span class="fw-bold text-indigo">A.</span><span>60 km/hr</span>
+                            </label>
+                            <label class="aptitude-option-card" id="optLabel-B" onclick="chooseAptOption('B')">
+                                <input class="form-check-input" type="radio" name="aptOpts" id="aptOpt-B" value="B">
+                                <span class="fw-bold text-indigo">B.</span><span>72 km/hr</span>
+                            </label>
+                            <label class="aptitude-option-card" id="optLabel-C" onclick="chooseAptOption('C')">
+                                <input class="form-check-input" type="radio" name="aptOpts" id="aptOpt-C" value="C">
+                                <span class="fw-bold text-indigo">C.</span><span>80 km/hr</span>
+                            </label>
+                        </div>
+
+                        <div class="d-flex">
+                            <button class="btn btn-premium rounded-pill px-4 ms-auto" id="aptNextBtn"
+                                onclick="nextAptQuestion()">
+                                Next Question <i class="bi bi-chevron-right ms-1"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Aptitude Score result card -->
+            <div class="row d-none" id="aptitudeResultPanel">
+                <div class="col-lg-4 mb-4">
+                    <div
+                        class="premium-card text-center d-flex flex-column align-items-center justify-content-center h-100 py-5">
+                        <h5 class="fw-bold text-secondary mb-4">Quiz Score</h5>
+                        <div class="progress-ring mb-4" style="width: 150px; height: 150px;">
+                            <svg width="150" height="150">
+                                <circle class="progress-ring-bg" cx="75" cy="75" r="65" stroke-width="12"></circle>
+                                <circle class="progress-ring-bar" cx="75" cy="75" r="65" stroke-width="12"
+                                    stroke-dasharray="408.4" stroke-dashoffset="0" id="repAptRing"></circle>
+                                <!-- 100% -->
+                            </svg>
+                            <div class="progress-ring-text" style="font-size: 2rem;">100%</div>
+                        </div>
+                        <h5 class="fw-bold mb-1 text-primary">2 / 2 Correct</h5>
+                    </div>
+                </div>
+
+                <div class="col-lg-8 mb-4">
+                    <div class="premium-card h-100">
+                        <h5 class="fw-bold mb-4">Step-by-Step Logic sheets</h5>
+                        <div class="p-3 border rounded-4 bg-body-tertiary small text-secondary">
+                            <strong class="text-indigo d-block mb-1">Question 1 Solution:</strong>
+                            Speed = Distance / Time = 120m / 6s = 20 m/s. Convert to km/hr by multiplying 18/5: 20 *
+                            18/5 = 72 km/hr. Correct choice is B.
+                        </div>
+
+                        <button class="btn btn-premium mt-4 rounded-pill px-4" onclick="resetAptitudeQuiz()">
+                            Start Another Exam
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ================= 6. CAREER COUNSELOR PANEL ================= -->
+    <section id="sect-counselor" class="app-section">
+        <div class="container py-4">
+            <div class="row">
+                <div class="col-lg-4 mb-4">
+                    <div class="premium-card">
+                        <h5 class="fw-bold mb-3">Map Career Path</h5>
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold text-secondary">My Current Skills</label>
+                            <textarea class="form-control form-control-premium" id="skillsInput" rows="3"
+                                placeholder="Python, SQL, basic HTML..."></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold text-secondary">My Academic Interests</label>
+                            <textarea class="form-control form-control-premium" id="interestsInput" rows="3"
+                                placeholder="Backend design, web databases..."></textarea>
+                        </div>
+                        <button class="btn btn-premium w-100" onclick="triggerMockCareerCounsel()">
+                            Map Career Path
+                        </button>
+                    </div>
+                </div>
+
+                <div class="col-lg-8 mb-4">
+                    <div class="premium-card" style="min-height: 380px;">
+                        <h5 class="fw-bold mb-3 text-indigo">Personalized AI Pathway</h5>
+
+                        <div class="p-3 border rounded-4 bg-body-tertiary small text-secondary" id="counselorContent">
+                            Map skills and targets on the left form to generate custom roadmap structures.
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="py-4 mt-5 border-top border-secondary text-center text-secondary small">
+        <div class="container">
+            <p class="mb-0">© 2026 PrepAI Pro. Single-Page local demonstration. SDG 4 Quality Education.</p>
+        </div>
+    </footer>
+
+    <!-- Bootstrap 5 Bundle JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <script>
+        // Master Section Switcher
+        function switchSection(sectionId) {
+            // Hide all sections
+            document.querySelectorAll('.app-section').forEach(sect => {
+                sect.classList.remove('active');
+            });
+            // Show target section
+            const targetSect = document.getElementById(`sect-${sectionId}`);
+            if (targetSect) targetSect.classList.add('active');
+
+            // Manage active nav links
+            document.querySelectorAll('.nav-link-item').forEach(link => {
+                link.classList.remove('active');
+            });
+            const activeLink = document.getElementById(`nav-${sectionId}`);
+            if (activeLink) activeLink.classList.add('active');
+
+            // Clean/activate camera triggers if navigating to interview room
+            if (sectionId === 'interview') {
+                initDemoWebcam();
+            } else {
+                stopDemoWebcam();
+            }
+        }
+
+        // Initialize dynamic Chart.js configurations inside the Dashboard
+        let dashboardChart = null;
+        document.addEventListener('DOMContentLoaded', () => {
+            const ctx = document.getElementById('dashboardChart').getContext('2d');
+            dashboardChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: ['Mock 1', 'Mock 2', 'Mock 3', 'Mock 4'],
+                    datasets: [{
+                        label: 'Mock Performance',
+                        data: [70, 75, 78, 82],
+                        borderColor: '#6366f1',
+                        backgroundColor: 'rgba(99, 102, 241, 0.1)',
+                        fill: true,
+                        tension: 0.4,
+                        borderWidth: 3
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: { min: 0, max: 100 }
+                    }
+                }
+            });
+        });
+
+        // 1. Resume Mock Scanner actions
+        function triggerMockResumeScan() {
+            const spinner = document.getElementById('resumeScannerSpinner');
+            spinner.classList.remove('d-none');
+
+            setTimeout(() => {
+                spinner.classList.add('d-none');
+                document.getElementById('resumeUploadPanel').classList.add('d-none');
+                document.getElementById('resumeReportPanel').classList.remove('d-none');
+
+                // Update stats counts
+                document.getElementById('statResumeScore').textContent = "78%";
+            }, 2000);
+        }
+        function resetResumeUploader() {
+            document.getElementById('resumeUploadPanel').classList.remove('d-none');
+            document.getElementById('resumeReportPanel').classList.add('d-none');
+        }
+
+        // 2. Webcam Mock Interview Room actions
+        let cameraStream = null;
+        let demoRecording = false;
+
+        async function initDemoWebcam() {
+            try {
+                cameraStream = await navigator.mediaDevices.getUserMedia({ video: true });
+                document.getElementById('demoWebcam').srcObject = cameraStream;
+            } catch (err) {
+                console.log("Webcam denied/missing in preview mode.");
+            }
+        }
+        function stopDemoWebcam() {
+            if (cameraStream) {
+                cameraStream.getTracks().forEach(track => track.stop());
+                cameraStream = null;
+            }
+        }
+        function toggleDemoRecording() {
+            const recordBtn = document.getElementById('demoRecordBtn');
+            const recOverlay = document.getElementById('demoRecOverlay');
+
+            if (!demoRecording) {
+                demoRecording = true;
+                recordBtn.className = "btn btn-danger btn-sm rounded-pill px-3 pulse-recording";
+                recordBtn.innerHTML = "<i class='bi bi-mic-fill me-1'></i> Stop Voice";
+                recOverlay.classList.remove('d-none');
+
+                // Mock text speech transcript in browser
+                document.getElementById('demoTranscriptText').value = "List comprehensions provide a concise way to create lists in Python. They are generally faster than standard for-loops because they are optimized in C under the hood...";
+            } else {
+                demoRecording = false;
+                recordBtn.className = "btn btn-premium btn-sm rounded-pill px-3";
+                recordBtn.innerHTML = "<i class='bi bi-mic me-1'></i> Speak Answer";
+                recOverlay.classList.add('d-none');
+            }
+        }
+
+        let demoIntQIdx = 0;
+        function nextDemoQuestion() {
+            if (demoIntQIdx === 0) {
+                demoIntQIdx = 1;
+                document.getElementById('qIndexDisp').textContent = "Question 2 of 3";
+                document.getElementById('qTextDisp').textContent = "Explain index key operations inside SQL databases and how they speed up queries.";
+                document.getElementById('demoTranscriptText').value = "";
+                document.getElementById('qTrack-0').className = "p-2 border rounded-3 bg-success-subtle text-success";
+                document.getElementById('qTrack-1').className = "p-2 border rounded-3 bg-body-secondary border-primary";
+            } else {
+                // Complete Mock
+                document.getElementById('interviewSessionPanel').classList.add('d-none');
+                document.getElementById('interviewScorePanel').classList.remove('d-none');
+            }
+        }
+        function resetDemoInterview() {
+            demoIntQIdx = 0;
+            document.getElementById('interviewSessionPanel').classList.remove('d-none');
+            document.getElementById('interviewScorePanel').classList.add('d-none');
+            document.getElementById('qIndexDisp').textContent = "Question 1 of 3";
+            document.getElementById('qTextDisp').textContent = "Explain list comprehensions in Python and their performance advantages.";
+            document.getElementById('demoTranscriptText').value = "";
+            document.getElementById('qTrack-0').className = "p-2 border rounded-3 bg-body-secondary border-primary";
+            document.getElementById('qTrack-1').className = "p-2 border rounded-3 bg-body-tertiary";
+            initDemoWebcam();
+        }
+
+        // 3. Timed Aptitude Exam actions
+        let aptQIdx = 0;
+        function chooseAptOption(option) {
+            ['A', 'B', 'C'].forEach(opt => {
+                document.getElementById(`optLabel-${opt}`).classList.remove('selected');
+            });
+            document.getElementById(`optLabel-${option}`).classList.add('selected');
+            document.getElementById(`aptCheck-${aptQIdx}`).className = "btn btn-success rounded-circle";
+        }
+        function nextAptQuestion() {
+            if (aptQIdx === 0) {
+                aptQIdx = 1;
+                document.getElementById('aptIndexDisp').textContent = "Question 2 of 2";
+                document.getElementById('aptTextDisp').textContent = "Find the missing number in the series: 3, 5, 9, 17, 33, ?";
+
+                // Options swap
+                document.getElementById('optLabel-A').querySelector('span:last-child').textContent = "48";
+                document.getElementById('optLabel-B').querySelector('span:last-child').textContent = "55";
+                document.getElementById('optLabel-C').querySelector('span:last-child').textContent = "65";
+
+                ['A', 'B', 'C'].forEach(opt => {
+                    document.getElementById(`optLabel-${opt}`).classList.remove('selected');
+                });
+
+                document.getElementById('aptNextBtn').textContent = "Complete Quiz";
+            } else {
+                document.getElementById('aptitudeQuizPanel').classList.add('d-none');
+                document.getElementById('aptitudeResultPanel').classList.remove('d-none');
+            }
+        }
+        function resetAptitudeQuiz() {
+            aptQIdx = 0;
+            document.getElementById('aptitudeQuizPanel').classList.remove('d-none');
+            document.getElementById('aptitudeResultPanel').classList.add('d-none');
+            document.getElementById('aptIndexDisp').textContent = "Question 1 of 2";
+            document.getElementById('aptTextDisp').textContent = "A train 120 m long passes a telegraph post in 6 seconds. Find the speed of the train in km/hr.";
+
+            document.getElementById('optLabel-A').querySelector('span:last-child').textContent = "60 km/hr";
+            document.getElementById('optLabel-B').querySelector('span:last-child').textContent = "72 km/hr";
+            document.getElementById('optLabel-C').querySelector('span:last-child').textContent = "80 km/hr";
+
+            ['A', 'B', 'C'].forEach(opt => {
+                document.getElementById(`optLabel-${opt}`).classList.remove('selected');
+            });
+            document.getElementById('aptNextBtn').innerHTML = "Next Question <i class='bi bi-chevron-right ms-1'></i>";
+            document.getElementById('aptCheck-0').className = "btn btn-outline-secondary rounded-circle";
+            document.getElementById('aptCheck-1').className = "btn btn-outline-secondary rounded-circle";
+        }
+
+        // 4. AI Counselor Counseling actions
+        function triggerMockCareerCounsel() {
+            const skills = document.getElementById('skillsInput').value || "Python, SQL";
+            const interests = document.getElementById('interestsInput').value || "Backend design";
+
+            document.getElementById('counselorContent').innerHTML = `
+                <h6 class='fw-bold text-success mb-2'><i class='bi bi-patch-check-fill me-1'></i>AI Suggestion: Backend Web Developer</h6>
+                <p>Based on your skills in <strong>${skills}</strong> and interests in <strong>${interests}</strong>, backend engineering is highly recommended.</p>
+                <h6 class='fw-bold text-primary mb-2'>Learning Roadmap:</h6>
+                <ul>
+                    <li><strong>Month 1</strong>: Master Flask framework routing and SQLAlchemy ORM models.</li>
+                    <li><strong>Month 2</strong>: Build database normalizing schemas and implement indexes.</li>
+                    <li><strong>Month 3</strong>: Deploy containers using Docker on AWS.</li>
+                </ul>
+            `;
+        }
+    </script>
+
+    <!-- Three.js Library CDN -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script>
+        // Check if Three.js is loaded and initialize
+        if (typeof THREE !== 'undefined') {
+            init3DScene();
+        } else {
+            // Fallback load
+            const script = document.createElement('script');
+            script.src = "https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js";
+            script.onload = () => { init3DScene(); };
+            document.head.appendChild(script);
+        }
+
+        function init3DScene() {
+            const container = document.getElementById('canvas-3d-container');
+            if (!container) return;
+
+            container.innerHTML = '';
+
+            // Scene Setup
+            const scene = new THREE.Scene();
+
+            // Camera
+            const camera = new THREE.PerspectiveCamera(45, container.clientWidth / container.clientHeight, 1, 1000);
+            camera.position.set(0, 5, 140);
+
+            // Renderer
+            const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+            renderer.setSize(container.clientWidth, container.clientHeight);
+            renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+            renderer.shadowMap.enabled = true;
+            container.appendChild(renderer.domElement);
+
+            // Ambient soft lighting
+            const ambientLight = new THREE.AmbientLight(0xffffff, 0.45);
+            scene.add(ambientLight);
+
+            // Soft studio keylights
+            const keyLight = new THREE.DirectionalLight(0xffffff, 0.9);
+            keyLight.position.set(-45, 60, 40);
+            keyLight.castShadow = true;
+            scene.add(keyLight);
+
+            const fillLight = new THREE.DirectionalLight(0x818cf8, 0.7);
+            fillLight.position.set(45, 20, 20);
+            scene.add(fillLight);
+            
+            // Add a cool blue back rim light for futuristic sci-fi silhouette
+            const rimLight = new THREE.DirectionalLight(0x22d3ee, 1.2);
+            rimLight.position.set(0, -20, -50);
+            scene.add(rimLight);
+
+            // Main Quantum Core Assembly Group
+            const robotGroup = new THREE.Group();
+            robotGroup.position.set(0, -5, 0);
+            scene.add(robotGroup);
+
+            // Materials System
+            const titaniumMat = new THREE.MeshStandardMaterial({
+                color: 0x1e293b, // Titanium dark slate gray
+                metalness: 0.95,
+                roughness: 0.12
+            });
+
+            const chromeMat = new THREE.MeshStandardMaterial({
+                color: 0xe2e8f0, // Silver chrome
+                metalness: 0.98,
+                roughness: 0.05
+            });
+
+            const neonCyanMat = new THREE.MeshStandardMaterial({
+                color: 0x06b6d4,
+                emissive: 0x22d3ee,
+                emissiveIntensity: 1.8
+            });
+
+            const neonIndigoMat = new THREE.MeshStandardMaterial({
+                color: 0x6366f1,
+                emissive: 0x818cf8,
+                emissiveIntensity: 1.8
+            });
+
+            const coreGlassMat = new THREE.MeshPhysicalMaterial({
+                color: 0x818cf8, // Indigo tinted translucent glass
+                transparent: true,
+                opacity: 0.38,
+                roughness: 0.08,
+                metalness: 0.2,
+                transmission: 0.92,
+                ior: 1.52,
+                side: THREE.DoubleSide
+            });
+
+            const innerGlowMat = new THREE.MeshStandardMaterial({
+                color: 0x06b6d4,
+                emissive: 0x22d3ee,
+                emissiveIntensity: 2.2
+            });
+
+            // 1. Double-Layer Quantum Core Sphere
+            const innerCoreGeom = new THREE.SphereGeometry(10, 32, 32);
+            const innerCore = new THREE.Mesh(innerCoreGeom, innerGlowMat);
+            robotGroup.add(innerCore);
+
+            const outerCoreGeom = new THREE.SphereGeometry(16, 32, 32);
+            const outerCore = new THREE.Mesh(outerCoreGeom, coreGlassMat);
+            robotGroup.add(outerCore);
+
+            // 2. Interactive "Oracle Eye" Gaze-Tracking Iris Group
+            const oracleEyeGroup = new THREE.Group();
+            oracleEyeGroup.position.set(0, 0, 0);
+            robotGroup.add(oracleEyeGroup);
+
+            // Cybernetic metal housing collar
+            const eyeHousingGeom = new THREE.CylinderGeometry(8.5, 8.5, 3, 32);
+            const eyeHousing = new THREE.Mesh(eyeHousingGeom, titaniumMat);
+            eyeHousing.rotation.x = Math.PI / 2;
+            eyeHousing.position.set(0, 0, 14.5);
+            oracleEyeGroup.add(eyeHousing);
+
+            // Concentric Glowing Rings
+            const irisRingOuter = new THREE.Mesh(new THREE.TorusGeometry(6, 0.4, 8, 32), neonCyanMat);
+            irisRingOuter.position.set(0, 0, 16);
+            oracleEyeGroup.add(irisRingOuter);
+
+            const irisRingInner = new THREE.Mesh(new THREE.TorusGeometry(4.2, 0.25, 8, 32), neonIndigoMat);
+            irisRingInner.position.set(0, 0, 16.1);
+            oracleEyeGroup.add(irisRingInner);
+
+            // Center glowing laser lens pupil
+            const lensPupil = new THREE.Mesh(new THREE.SphereGeometry(2.2, 16, 16), neonCyanMat);
+            lensPupil.position.set(0, 0, 15.8);
+            oracleEyeGroup.add(lensPupil);
+
+            // Cyber slot markings
+            const markGeom = new THREE.BoxGeometry(2.5, 0.3, 0.3);
+            const markLeft = new THREE.Mesh(markGeom, chromeMat);
+            markLeft.position.set(-6, 0, 16.2);
+            oracleEyeGroup.add(markLeft);
+
+            const markRight = new THREE.Mesh(markGeom, chromeMat);
+            markRight.position.set(6, 0, 16.2);
+            oracleEyeGroup.add(markRight);
+
+            // 3. Interlocking Gyroscopic Cyber-Cage Shell Rings
+            const gyroOuter = new THREE.Mesh(new THREE.TorusGeometry(26, 1.1, 16, 64), titaniumMat);
+            robotGroup.add(gyroOuter);
+
+            const gyroMiddle = new THREE.Mesh(new THREE.TorusGeometry(23, 0.8, 16, 64), chromeMat);
+            robotGroup.add(gyroMiddle);
+
+            const gyroInner = new THREE.Mesh(new THREE.TorusGeometry(20, 0.55, 16, 64), neonIndigoMat);
+            robotGroup.add(gyroInner);
+
+            // 4. Sweeping Holographic Laser Scanner Ring
+            const laserScanner = new THREE.Mesh(new THREE.TorusGeometry(18, 0.25, 8, 64), neonCyanMat);
+            robotGroup.add(laserScanner);
+
+            // 5. Data Constellation Particles Group
+            const particleGroup = new THREE.Group();
+            robotGroup.add(particleGroup);
+
+            const particleGeom = new THREE.SphereGeometry(0.5, 8, 8);
+            const particlesData = [];
+
+            for (let i = 0; i < 55; i++) {
+                const isCyan = Math.random() > 0.4;
+                const pMesh = new THREE.Mesh(particleGeom, isCyan ? neonCyanMat : neonIndigoMat);
+                
+                // Spherical random coordinate angles
+                const data = {
+                    mesh: pMesh,
+                    orbitRadius: 18.5 + Math.random() * 8.5,
+                    angleTheta: Math.random() * Math.PI * 2,
+                    anglePhi: Math.random() * Math.PI,
+                    speedTheta: (0.01 + Math.random() * 0.02) * (Math.random() > 0.5 ? 1 : -1),
+                    speedPhi: (0.005 + Math.random() * 0.01) * (Math.random() > 0.5 ? 1 : -1)
+                };
+                
+                particleGroup.add(pMesh);
+                particlesData.push(data);
+            }
+
+            // 6. Dual Hovering Satellite Sentinel Probes
+            const satelliteGeom = new THREE.OctahedronGeometry(3.5, 0);
+            
+            const leftSatellite = new THREE.Mesh(satelliteGeom, chromeMat);
+            leftSatellite.position.set(-42, -10, 20);
+            robotGroup.add(leftSatellite);
+
+            const leftSatCore = new THREE.Mesh(new THREE.SphereGeometry(1.6, 8, 8), neonCyanMat);
+            leftSatellite.add(leftSatCore);
+
+            const rightSatellite = new THREE.Mesh(satelliteGeom, chromeMat);
+            rightSatellite.position.set(42, -10, 20);
+            robotGroup.add(rightSatellite);
+
+            const rightSatCore = new THREE.Mesh(new THREE.SphereGeometry(1.6, 8, 8), neonIndigoMat);
+            rightSatellite.add(rightSatCore);
+
+            // Dynamic Data Lines connecting Satellites to Core center
+            const lineMat = new THREE.LineBasicMaterial({
+                color: 0x22d3ee,
+                transparent: true,
+                opacity: 0.7
+            });
+
+            const leftLineGeom = new THREE.BufferGeometry().setFromPoints([
+                leftSatellite.position,
+                new THREE.Vector3(0, 0, 0)
+            ]);
+            const leftLine = new THREE.Line(leftLineGeom, lineMat);
+            robotGroup.add(leftLine);
+
+            const rightLineGeom = new THREE.BufferGeometry().setFromPoints([
+                rightSatellite.position,
+                new THREE.Vector3(0, 0, 0)
+            ]);
+            const rightLine = new THREE.Line(rightLineGeom, lineMat);
+            robotGroup.add(rightLine);
+
+            // 7. Floating Sci-Fi Hologram Base & Beams
+            const hologramGroup = new THREE.Group();
+            hologramGroup.position.set(0, -32, 10);
+            robotGroup.add(hologramGroup);
+
+            // Glowing Outer Hologram Projection Rings
+            const projectionRingGeom = new THREE.RingGeometry(15, 38, 32);
+            const projectionRing = new THREE.Mesh(projectionRingGeom, coreGlassMat);
+            projectionRing.rotation.x = -Math.PI / 2.5; // Tilted towards the user
+            hologramGroup.add(projectionRing);
+
+            // Spotlight casting beautiful cyan ray onto core from below
+            const holoSpotLight = new THREE.SpotLight(0x22d3ee, 4, 120, Math.PI / 3.5, 0.5, 1.2);
+            holoSpotLight.position.set(0, -10, 0);
+            holoSpotLight.target = innerCore;
+            hologramGroup.add(holoSpotLight);
+
+            // Vertical fading hologram cylinders representing code beams
+            const beamMat = new THREE.MeshPhysicalMaterial({
+                color: 0x22d3ee,
+                transparent: true,
+                opacity: 0.18,
+                side: THREE.DoubleSide,
+                blending: THREE.AdditiveBlending
+            });
+            const beamGeom = new THREE.CylinderGeometry(1.5, 3.5, 40, 16, 1, true);
+            const beamGroup = new THREE.Group();
+            hologramGroup.add(beamGroup);
+
+            const beams = [];
+            for (let i = 0; i < 4; i++) {
+                const b = new THREE.Mesh(beamGeom, beamMat);
+                b.position.set((Math.random() - 0.5) * 45, 18, (Math.random() - 0.5) * 45);
+                b.scale.y = 0.5 + Math.random() * 0.8;
+                beamGroup.add(b);
+                beams.push(b);
+            }
+
+            // Mouse Tracker variables
+            let mouse = { x: 0, y: 0 };
+
+            window.addEventListener('mousemove', (e) => {
+                mouse.x = (e.clientX / window.innerWidth) * 2 - 1;
+                mouse.y = -(e.clientY / window.innerHeight) * 2 + 1;
+
+                // Drift calculations for absolute floating glass cards
+                const widgets = document.querySelectorAll('.float-widget');
+                const diffX = e.clientX - window.innerWidth / 2;
+                const diffY = e.clientY - window.innerHeight / 2;
+
+                widgets.forEach((widget, index) => {
+                    let factor = (index + 1) * 0.02;
+                    if (index % 2 === 0) factor = -factor;
+                    widget.style.transform = `translate(${diffX * factor}px, ${diffY * factor}px)`;
+                });
+            });
+
+            // Responsive canvas resize
+            window.addEventListener('resize', () => {
+                const width = container.clientWidth;
+                const height = container.clientHeight;
+                camera.aspect = width / height;
+                camera.updateProjectionMatrix();
+                renderer.setSize(width, height);
+            });
+
+            // Render and LERP update loop
+            let clock = new THREE.Clock();
+            function animate() {
+                requestAnimationFrame(animate);
+
+                const time = clock.getElapsedTime();
+
+                // Gentle LERP Levitation Drift of the entire Assembly (multi-axis)
+                robotGroup.position.y = -5 + Math.sin(time * 1.5) * 4.0;
+                robotGroup.position.x = Math.cos(time * 0.9) * 1.8;
+                robotGroup.position.z = Math.sin(time * 0.6) * 1.2;
+
+                // Interlocking rings rotate dynamically around independent axes
+                gyroOuter.rotation.x = time * 0.45;
+                gyroOuter.rotation.y = time * 0.15;
+
+                gyroMiddle.rotation.y = -time * 0.65;
+                gyroMiddle.rotation.z = time * 0.25;
+
+                gyroInner.rotation.z = time * 0.95;
+                gyroInner.rotation.x = -time * 0.35;
+
+                // Glowing inner core pulses
+                const pulse = Math.sin(time * 3.5) * 0.55 + 1.85;
+                // Scale core dynamic pulsing intensity based on mouse closeness
+                const mouseDist = Math.sqrt(mouse.x * mouse.x + mouse.y * mouse.y);
+                innerGlowMat.emissiveIntensity = pulse + (1.0 - Math.min(mouseDist, 1.0)) * 0.8;
+                innerCore.scale.setScalar(1.0 + Math.sin(time * 3.5) * 0.04);
+
+                // Sweeping laser scanner moves continuously up & down, and pulses scale
+                laserScanner.position.y = Math.sin(time * 2.2) * 14.5;
+                laserScanner.scale.setScalar(1.0 + Math.cos(time * 2.2) * 0.08);
+
+                // Gentle spin for holographic projection ring
+                projectionRing.rotation.z = time * 0.3;
+
+                // Update fading code beams vertical heights
+                beams.forEach((b, idx) => {
+                    b.position.y = 18 + Math.sin(time * 2.0 + idx) * 3.0;
+                    b.material.opacity = 0.1 + Math.sin(time * 3.0 + idx) * 0.08;
+                });
+
+                // Interpolate central "Oracle Eye" iris rotation to point smoothly at cursor
+                const targetRotY = mouse.x * 0.65;
+                const targetRotX = -mouse.y * 0.45;
+
+                oracleEyeGroup.rotation.y += (targetRotY - oracleEyeGroup.rotation.y) * 0.08;
+                oracleEyeGroup.rotation.x += (targetRotX - oracleEyeGroup.rotation.x) * 0.08;
+
+                // Orbiting particle swarm
+                particlesData.forEach(p => {
+                    p.angleTheta += p.speedTheta;
+                    p.anglePhi += p.speedPhi;
+                    p.mesh.position.x = p.orbitRadius * Math.sin(p.anglePhi) * Math.cos(p.angleTheta);
+                    p.mesh.position.y = p.orbitRadius * Math.sin(p.anglePhi) * Math.sin(p.angleTheta);
+                    p.mesh.position.z = p.orbitRadius * Math.cos(p.anglePhi);
+                });
+
+                // Satellite sentinel probes floating oscillations
+                leftSatellite.position.y = -10 + Math.sin(time * 3.2) * 4.5;
+                leftSatellite.position.z = 20 + Math.cos(time * 2.8) * 3.0;
+                leftSatellite.rotation.y = time * 1.5;
+                leftSatellite.rotation.x = time * 0.8;
+
+                rightSatellite.position.y = -10 + Math.cos(time * 3.5) * 4.5;
+                rightSatellite.position.z = 20 + Math.sin(time * 3.0) * 3.0;
+                rightSatellite.rotation.y = -time * 1.2;
+                rightSatellite.rotation.z = time * 0.9;
+
+                // Dynamic Laser filaments connecting Satellites to Core center
+                const leftPoints = [
+                    leftSatellite.position,
+                    new THREE.Vector3(0, 0, 0)
+                ];
+                leftLine.geometry.setFromPoints(leftPoints);
+
+                const rightPoints = [
+                    rightSatellite.position,
+                    new THREE.Vector3(0, 0, 0)
+                ];
+                rightLine.geometry.setFromPoints(rightPoints);
+
+                renderer.render(scene, camera);
+            }
+
+            animate();
+        }
+    </script>
+</body>
+
+</html>

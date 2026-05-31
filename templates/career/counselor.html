@@ -1,0 +1,131 @@
+{% extends "base.html" %}
+
+{% block title %}Career Counselor - PrepAI Pro{% endblock %}
+{% block page_title %}AI Career counselor{% endblock %}
+
+{% block content %}
+<div class="row">
+    <!-- Left Column: Input Form -->
+    <div class="col-lg-4 mb-4">
+        <div class="premium-card">
+            <h5 class="fw-bold mb-3"><i class="bi bi-person-fill-gear text-primary me-2"></i>My Profile Inputs</h5>
+            <p class="text-secondary small mb-4">Specify your current skill set, background interests, and target careers. Gemini AI will build a professional month-by-month learning pathway.</p>
+            
+            <form action="{{ url_for('career.counselor') }}" method="POST" id="counselorForm">
+                {{ form.csrf_token }}
+                
+                <div class="mb-3">
+                    <label for="skills" class="form-label fw-semibold text-secondary">My Current Skills</label>
+                    {{ form.skills(class="form-control form-control-premium", rows="3", placeholder="Python, HTML, SQL, basic documentation...") }}
+                    {% if form.skills.errors %}
+                        <div class="text-danger small mt-1">{% for error in form.skills.errors %}{{ error }}{% endfor %}</div>
+                    {% endif %}
+                </div>
+                
+                <div class="mb-3">
+                    <label for="interests" class="form-label fw-semibold text-secondary">My Academic Interests</label>
+                    {{ form.interests(class="form-control form-control-premium", rows="3", placeholder="Web development, cloud architectures, deep learning models...") }}
+                    {% if form.interests.errors %}
+                        <div class="text-danger small mt-1">{% for error in form.interests.errors %}{{ error }}{% endfor %}</div>
+                    {% endif %}
+                </div>
+                
+                <div class="mb-4">
+                    <label for="preferred_domain" class="form-label fw-semibold text-secondary">Target Placement Domain</label>
+                    {{ form.preferred_domain(class="form-control form-control-premium", placeholder="e.g. Software Engineer, Data Analyst") }}
+                </div>
+                
+                <button type="submit" class="btn btn-premium w-100">
+                    <i class="bi bi-compass-fill me-2"></i>Map Career Path
+                </button>
+            </form>
+        </div>
+    </div>
+    
+    <!-- Right Column: AI Guidance Output Console -->
+    <div class="col-lg-8">
+        {% if guidance %}
+            <div class="premium-card mb-4">
+                <h5 class="fw-bold mb-4 text-indigo"><i class="bi bi-map-fill text-indigo me-2"></i>Personalized Learning Blueprint</h5>
+                
+                <!-- Tabbed Outputs -->
+                <ul class="nav nav-tabs border-bottom mb-4" id="guidanceTab" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active fw-bold text-indigo" id="paths-tab" data-bs-toggle="tab" data-bs-target="#paths-pane" type="button" role="tab">Suggested Paths</button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link fw-bold text-indigo" id="skills-tab" data-bs-toggle="tab" data-bs-target="#skills-pane" type="button" role="tab">Skills Gap</button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link fw-bold text-indigo" id="roadmap-tab" data-bs-toggle="tab" data-bs-target="#roadmap-pane" type="button" role="tab">Month Roadmap</button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link fw-bold text-indigo" id="certs-tab" data-bs-toggle="tab" data-bs-target="#certs-pane" type="button" role="tab">Certifications</button>
+                    </li>
+                </ul>
+                
+                <div class="tab-content text-secondary small" id="guidanceTabContent" style="line-height: 1.6;">
+                    <!-- Paths -->
+                    <div class="tab-pane fade show active" id="paths-pane" role="tabpanel">
+                        <div class="p-3 border rounded-4 bg-body-tertiary" style="white-space: pre-line;">
+                            {{ guidance.career_paths }}
+                        </div>
+                    </div>
+                    <!-- Skills -->
+                    <div class="tab-pane fade" id="skills-pane" role="tabpanel">
+                        <div class="p-3 border rounded-4 bg-body-tertiary" style="white-space: pre-line;">
+                            {{ guidance.required_skills }}
+                        </div>
+                    </div>
+                    <!-- Roadmap -->
+                    <div class="tab-pane fade" id="roadmap-pane" role="tabpanel">
+                        <div class="p-3 border rounded-4 bg-body-tertiary" style="white-space: pre-line;">
+                            {{ guidance.roadmap }}
+                        </div>
+                    </div>
+                    <!-- Certs -->
+                    <div class="tab-pane fade" id="certs-pane" role="tabpanel">
+                        <div class="p-3 border rounded-4 bg-body-tertiary" style="white-space: pre-line;">
+                            {{ guidance.certifications }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% else %}
+            <div class="premium-card text-center py-5 text-secondary">
+                <i class="bi bi-compass fs-1 mb-3 d-block text-white-50"></i>
+                <h5 class="fw-bold">No Career Roadmap Generated</h5>
+                <p class="small mb-0">Fill out your background details on the left form to request a personalized career path and roadmap from Gemini AI!</p>
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Modal Loading Overlay -->
+<div class="modal fade" id="loadingModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content glass-card border-0 p-4 text-center">
+            <div class="modal-body py-4">
+                <div class="spinner-border text-primary fs-3 mb-3" style="width: 3rem; height: 3rem;" role="status"></div>
+                <h5 class="fw-bold mb-2">Analyzing Career Options...</h5>
+                <p class="text-secondary small mb-0">Gemini AI is matching your skills against industry standards, projecting job categories, and formatting roadmaps. Please wait.</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const form = document.getElementById('counselorForm');
+    const loadingModal = new bootstrap.Modal(document.getElementById('loadingModal'));
+    
+    if (form) {
+        form.addEventListener('submit', () => {
+            loadingModal.show();
+        });
+    }
+});
+</script>
+{% endblock %}

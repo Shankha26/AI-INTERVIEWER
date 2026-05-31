@@ -1,0 +1,168 @@
+{% extends "base.html" %}
+
+{% block title %}Interview Report - PrepAI Pro{% endblock %}
+{% block page_title %}Evaluation Scorecard{% endblock %}
+
+{% block content %}
+<div class="row">
+    <!-- Left Column: Score Ring and Statistics -->
+    <div class="col-lg-4 mb-4">
+        <div class="premium-card text-center d-flex flex-column align-items-center justify-content-center h-100 py-5">
+            <h5 class="fw-bold text-secondary mb-4">Mock Interview Score</h5>
+
+            <div class="progress-ring mb-4" style="width: 150px; height: 150px;">
+                <svg width="150" height="150">
+                    <circle class="progress-ring-bg" cx="75" cy="75" r="65" stroke-width="12"></circle>
+                    <circle class="progress-ring-bar" cx="75" cy="75" r="65" stroke-width="12" stroke-dasharray="408.4"
+                        stroke-dashoffset="{{ 408.4 - (408.4 * interview.score / 100) }}"></circle>
+                </svg>
+                <div class="progress-ring-text" style="font-size: 2rem;">{{ interview.score }}%</div>
+            </div>
+
+            <span
+                class="badge bg-indigo-subtle text-primary border border-primary-subtle px-4 py-2 rounded-pill fw-bold mb-4">
+                {{ interview.domain }} Category
+            </span>
+
+            <hr class="w-70 mb-4 border-secondary-subtle">
+
+            <div class="text-start px-2 w-100">
+                <h6 class="fw-bold mb-3"><i class="bi bi-calendar-event text-primary me-2"></i>Session Details</h6>
+                <div class="d-flex justify-content-between mb-2">
+                    <span class="text-secondary small">Date:</span>
+                    <span class="small fw-semibold">{{ interview.created_at.strftime('%b %d, %Y') }}</span>
+                </div>
+                <div class="d-flex justify-content-between">
+                    <span class="text-secondary small">Assessment:</span>
+                    <span class="small fw-semibold text-success">Completed</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Right Column: Executive Summary & Communication Scorecard -->
+    <div class="col-lg-8 mb-4">
+        <div class="premium-card h-100 d-flex flex-column justify-content-between">
+            <div>
+                <h5 class="fw-bold mb-3"><i class="bi bi-journals text-primary me-2"></i>Executive Summary</h5>
+                <p class="text-secondary small mb-4" style="line-height: 1.6; white-space: pre-line;">{{
+                    interview.feedback }}</p>
+            </div>
+
+            {% if comm_stats %}
+            <!-- Communication Scorecard (Pillars) -->
+            <div>
+                <h6 class="fw-bold text-primary mb-3"><i class="bi bi-mic-fill me-2"></i>Communication Scorecard</h6>
+                <div class="row g-3">
+                    <div class="col-6 col-md-4">
+                        <div class="p-2 border rounded-3 bg-body-tertiary text-center">
+                            <span class="text-secondary small d-block mb-1">Fluency</span>
+                            <h6 class="fw-bold text-indigo mb-0">{{ comm_stats.fluency }}%</h6>
+                        </div>
+                    </div>
+                    <div class="col-6 col-md-4">
+                        <div class="p-2 border rounded-3 bg-body-tertiary text-center">
+                            <span class="text-secondary small d-block mb-1">Confidence</span>
+                            <h6 class="fw-bold text-indigo mb-0">{{ comm_stats.confidence }}%</h6>
+                        </div>
+                    </div>
+                    <div class="col-6 col-md-4">
+                        <div class="p-2 border rounded-3 bg-body-tertiary text-center">
+                            <span class="text-secondary small d-block mb-1">Accuracy</span>
+                            <h6 class="fw-bold text-success mb-0">{{ comm_stats.accuracy }}%</h6>
+                        </div>
+                    </div>
+                    <div class="col-6 col-md-6 mt-md-3">
+                        <div class="p-2 border rounded-3 bg-body-tertiary text-center">
+                            <span class="text-secondary small d-block mb-1">Grammar</span>
+                            <h6 class="fw-bold text-indigo mb-0">{{ comm_stats.grammar }}%</h6>
+                        </div>
+                    </div>
+                    <div class="col-6 col-md-6 mt-md-3">
+                        <div class="p-2 border rounded-3 bg-body-tertiary text-center">
+                            <span class="text-secondary small d-block mb-1">Relevance</span>
+                            <h6 class="fw-bold text-indigo mb-0">{{ comm_stats.relevance }}%</h6>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- Detailed Question breakdown & transcripts -->
+<div class="row">
+    <div class="col-12">
+        <div class="premium-card">
+            <h5 class="fw-bold mb-4"><i class="bi bi-chat-text text-primary me-2"></i>Question-by-Question Transcript
+            </h5>
+
+            {% if voice_evals %}
+            <!-- Voice session breakdown -->
+            <div class="d-flex flex-column gap-4">
+                {% for eval in voice_evals %}
+                <div class="p-4 border rounded-4 bg-body-tertiary shadow-sm">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h6 class="fw-bold text-indigo mb-0">Question {{ loop.index }}</h6>
+                        <span class="badge bg-indigo text-white rounded-pill px-3">Accuracy: {{
+                            eval.technical_accuracy_score }}%</span>
+                    </div>
+
+                    <p class="fw-bold mb-2 text-primary">{{ eval.question_text }}</p>
+
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-7">
+                            <div class="p-3 border rounded-3 bg-white">
+                                <span class="text-secondary small d-block mb-1 fw-bold">Candidate Answer
+                                    Transcript:</span>
+                                <p class="small text-secondary mb-0">"{{ eval.transcript }}"</p>
+                            </div>
+                        </div>
+                        <div class="col-md-5">
+                            <div class="p-3 border rounded-3 bg-white h-100 d-flex flex-column justify-content-center">
+                                <span class="text-secondary small d-block mb-2 fw-bold">Recorded Recording
+                                    playback:</span>
+                                {% if eval.video_path %}
+                                <video src="{{ eval.video_path }}" class="w-100 rounded-3 border"
+                                    style="max-height: 120px;" controls></video>
+                                {% elif eval.audio_path %}
+                                <audio src="{{ eval.audio_path }}" class="w-100" controls></audio>
+                                {% else %}
+                                <span class="text-white-50 small"><i class="bi bi-x-circle me-1"></i>No media
+                                    captured</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="p-3 rounded-3 bg-indigo-subtle border border-primary-subtle text-secondary small">
+                        <strong class="text-indigo d-block mb-1"><i class="bi bi-cpu me-1"></i>AI Critique & Ideal
+                            Answer Points:</strong>
+                        {{ eval.feedback }}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <p class="text-secondary small mb-3">Standard text mock session questions breakdown</p>
+            <div class="alert alert-indigo-subtle border border-indigo-subtle py-3 small text-secondary">
+                <i class="bi bi-info-circle-fill text-indigo fs-5 me-2"></i>Review full evaluation report inside the
+                general scorecard summary above.
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4 mb-5">
+    <div class="col-12 text-center">
+        <a href="{{ url_for('interview.setup') }}" class="btn btn-premium rounded-pill px-4 me-3">
+            <i class="bi bi-arrow-repeat me-2"></i>New Interview
+        </a>
+        <a href="{{ url_for('dashboard.index') }}" class="btn btn-outline-secondary rounded-pill px-4">
+            <i class="bi bi-house me-2"></i>Back to Dashboard
+        </a>
+    </div>
+</div>
+{% endblock %}

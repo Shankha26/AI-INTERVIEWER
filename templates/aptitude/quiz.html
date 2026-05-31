@@ -1,0 +1,256 @@
+{% extends "base.html" %}
+
+{% block title %}Aptitude Test - PrepAI Pro{% endblock %}
+{% block page_title %}Live Examination{% endblock %}
+
+{% block content %}
+<div class="row">
+    <!-- Left Column: Navigation Checklist & Timer -->
+    <div class="col-lg-3 mb-4">
+        <div class="premium-card text-center mb-4 py-4">
+            <h6 class="fw-bold text-secondary mb-2">Time Remaining</h6>
+            <h2 class="fw-bold text-danger mb-0" id="countdownTimer">10:00</h2>
+            <small class="text-white-50 d-block mt-2">Test auto-submits on timer zero</small>
+        </div>
+        
+        <div class="premium-card">
+            <h6 class="fw-bold text-secondary mb-3">Questions Checklist</h6>
+            <div class="d-flex flex-wrap gap-2 justify-content-center" id="trackerGrid">
+                {% for q in questions %}
+                    <button class="btn btn-outline-secondary rounded-circle" id="tracker-{{ loop.index0 }}" onclick="jumpToQuestion({{ loop.index0 }})" style="width: 40px; height: 40px; display: inline-flex; align-items: center; justify-content: center;">
+                        {{ loop.index }}
+                    </button>
+                {% endfor %}
+            </div>
+            
+            <hr class="my-4 border-secondary-subtle">
+            
+            <div class="small text-secondary">
+                <p class="mb-1"><strong class="text-indigo">Exam Category:</strong> {{ category }}</p>
+                <p class="mb-0"><strong class="text-indigo">Total Items:</strong> {{ questions | length }} MCQs</p>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Right Column: Question Content -->
+    <div class="col-lg-9">
+        <div class="premium-card" style="min-height: 400px;">
+            <div class="question-container">
+                <h6 class="text-primary fw-bold mb-1" id="questionNumDisplay">Question 1</h6>
+                <h4 class="fw-bold mb-4" id="questionTextDisplay">Loading question prompt...</h4>
+                
+                <div class="d-flex flex-column gap-3 mb-4" id="optionsGroup">
+                    <!-- Option A -->
+                    <label class="aptitude-option-card" id="labelOptA">
+                        <input class="form-check-input" type="radio" name="options" id="optA" value="A">
+                        <span class="fw-bold text-indigo">A.</span>
+                        <span id="textOptA">Option content</span>
+                    </label>
+                    <!-- Option B -->
+                    <label class="aptitude-option-card" id="labelOptB">
+                        <input class="form-check-input" type="radio" name="options" id="optB" value="B">
+                        <span class="fw-bold text-indigo">B.</span>
+                        <span id="textOptB">Option content</span>
+                    </label>
+                    <!-- Option C -->
+                    <label class="aptitude-option-card" id="labelOptC">
+                        <input class="form-check-input" type="radio" name="options" id="optC" value="C">
+                        <span class="fw-bold text-indigo">C.</span>
+                        <span id="textOptC">Option content</span>
+                    </label>
+                    <!-- Option D -->
+                    <label class="aptitude-option-card" id="labelOptD">
+                        <input class="form-check-input" type="radio" name="options" id="optD" value="D">
+                        <span class="fw-bold text-indigo">D.</span>
+                        <span id="textOptD">Option content</span>
+                    </label>
+                </div>
+                
+                <div class="d-flex justify-content-between align-items-center mt-5">
+                    <button class="btn btn-outline-secondary rounded-pill px-4 d-none" id="prevBtn" onclick="navigateQuestion(-1)">
+                        <i class="bi bi-chevron-left me-1"></i> Back
+                    </button>
+                    <button class="btn btn-premium rounded-pill px-4 ms-auto" id="nextBtn" onclick="navigateQuestion(1)">
+                        Next Question <i class="bi bi-chevron-right ms-1"></i>
+                    </button>
+                    <button class="btn btn-success rounded-pill px-4 ms-auto d-none" id="submitBtn" onclick="submitExam()">
+                        <i class="bi bi-check2-all me-1"></i> Finish Test
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Evaluating Processing Modal -->
+<div class="modal fade" id="evalModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content glass-card border-0 p-4 text-center">
+            <div class="modal-body py-4">
+                <div class="spinner-border text-primary fs-3 mb-3" style="width: 3rem; height: 3rem;" role="status"></div>
+                <h5 class="fw-bold mb-2">Grading Test Papers...</h5>
+                <p class="text-secondary small mb-0">Our local testing model is validating your correct options and logging statistics. Please wait.</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script id="questions-data" type="application/json">
+    {{ questions | tojson | safe }}
+</script>
+
+<script>
+const quizQuestions = JSON.parse(document.getElementById('questions-data').textContent);
+const totalQuestions = quizQuestions.length;
+const quizAnswers = {}; // Map of user answers: { question_id: 'A' }
+
+let currentIdx = 0;
+let timeRemaining = parseInt("{{ time_limit }}") || 600; // seconds (600)
+
+document.addEventListener('DOMContentLoaded', () => {
+    // 1. Initialize timer countdown
+    const timerInterval = setInterval(() => {
+        timeRemaining--;
+        updateTimerDisplay();
+        
+        if (timeRemaining <= 0) {
+            clearInterval(timerInterval);
+            alert("Time has expired! Submitting your answers automatically.");
+            submitExam();
+        }
+    }, 1000);
+    
+    // 2. Load first question
+    showQuestion(0);
+    
+    // Listen for option clicks to update state checklist in real-time
+    ['optA', 'optB', 'optC', 'optD'].forEach(optId => {
+        document.getElementById(optId).addEventListener('change', (e) => {
+            if (e.target.checked) {
+                const q_id = quizQuestions[currentIdx].id;
+                quizAnswers[q_id] = e.target.value;
+                updateOptionHighlights(e.target.value);
+                updateTrackerGrid();
+            }
+        });
+    });
+});
+
+function updateTimerDisplay() {
+    const mins = Math.floor(timeRemaining / 60);
+    const secs = timeRemaining % 60;
+    document.getElementById('countdownTimer').textContent = 
+        `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+}
+
+function showQuestion(idx) {
+    currentIdx = idx;
+    const q = quizQuestions[idx];
+    
+    // Set text elements
+    document.getElementById('questionNumDisplay').textContent = `Question ${idx + 1} of ${totalQuestions}`;
+    document.getElementById('questionTextDisplay').textContent = q.question_text;
+    document.getElementById('textOptA').textContent = q.option_a;
+    document.getElementById('textOptB').textContent = q.option_b;
+    document.getElementById('textOptC').textContent = q.option_c;
+    document.getElementById('textOptD').textContent = q.option_d;
+    
+    // Check previously answered option if any
+    const savedAns = quizAnswers[q.id] || '';
+    ['A', 'B', 'C', 'D'].forEach(opt => {
+        const input = document.getElementById(`opt${opt}`);
+        input.checked = (savedAns === opt);
+    });
+    
+    updateOptionHighlights(savedAns);
+    updateTrackerGrid();
+    
+    // Configure buttons
+    const prevBtn = document.getElementById('prevBtn');
+    const nextBtn = document.getElementById('nextBtn');
+    const submitBtn = document.getElementById('submitBtn');
+    
+    if (idx === 0) {
+        prevBtn.classList.add('d-none');
+    } else {
+        prevBtn.classList.remove('d-none');
+    }
+    
+    if (idx === totalQuestions - 1) {
+        nextBtn.classList.add('d-none');
+        submitBtn.classList.remove('d-none');
+    } else {
+        nextBtn.classList.remove('d-none');
+        submitBtn.classList.add('d-none');
+    }
+}
+
+function updateOptionHighlights(selectedOption) {
+    ['A', 'B', 'C', 'D'].forEach(opt => {
+        const label = document.getElementById(`labelOpt${opt}`);
+        label.classList.remove('selected');
+        
+        if (selectedOption === opt) {
+            label.classList.add('selected');
+        }
+    });
+}
+
+function updateTrackerGrid() {
+    for (let i = 0; i < totalQuestions; i++) {
+        const btn = document.getElementById(`tracker-${i}`);
+        const q = quizQuestions[i];
+        
+        // Clear active styles
+        btn.className = "btn btn-outline-secondary rounded-circle";
+        
+        if (i === currentIdx) {
+            btn.classList.add('active');
+        }
+        
+        // Show success green if answered
+        if (quizAnswers[q.id]) {
+            btn.classList.remove('btn-outline-secondary');
+            btn.classList.add('btn-success');
+        }
+    }
+}
+
+function navigateQuestion(step) {
+    const nextIdx = currentIdx + step;
+    if (nextIdx >= 0 && nextIdx < totalQuestions) {
+        showQuestion(nextIdx);
+    }
+}
+
+function jumpToQuestion(idx) {
+    showQuestion(idx);
+}
+
+async function submitExam() {
+    const evalModal = new bootstrap.Modal(document.getElementById('evalModal'));
+    evalModal.show();
+    
+    try {
+        const response = await fetch('/aptitude/evaluate', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ answers: quizAnswers })
+        });
+        const result = await response.json();
+        
+        if (result.status === 'success') {
+            window.location.href = result.redirect_url;
+        } else {
+            evalModal.hide();
+            alert(`Evaluation failed: ${result.error}`);
+        }
+    } catch (err) {
+        evalModal.hide();
+        alert(`Network error on submission: ${err}`);
+    }
+}
+</script>
+{% endblock %}

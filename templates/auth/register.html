@@ -1,0 +1,84 @@
+{% extends "base.html" %}
+
+{% block title %}Register - PrepAI Pro{% endblock %}
+{% block page_title %}Candidate Enrollment{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center align-items-center py-4">
+    <div class="col-md-6 col-lg-5">
+        <div class="premium-card glass-card p-4 p-md-5">
+            <div class="text-center mb-4">
+                <i class="bi bi-person-badge-fill text-primary fs-1 mb-2"></i>
+                <h3 class="fw-bold mb-1">Create Account</h3>
+                <p class="text-secondary small">Enroll in SDG 4 Interview Preparation Platform</p>
+            </div>
+            
+            <form action="{{ url_for('auth.register') }}" method="POST">
+                {{ form.csrf_token }}
+                
+                <div class="mb-3">
+                    <label for="name" class="form-label fw-semibold text-secondary">Full Name</label>
+                    <div class="input-group">
+                        <span class="input-group-text bg-transparent border-end-0 border-secondary-subtle">
+                            <i class="bi bi-person text-secondary"></i>
+                        </span>
+                        {{ form.name(class="form-control form-control-premium border-start-0 ps-0", placeholder="John Doe") }}
+                    </div>
+                    {% if form.name.errors %}
+                        <div class="text-danger small mt-1">{% for error in form.name.errors %}{{ error }}{% endfor %}</div>
+                    {% endif %}
+                </div>
+                
+                <div class="mb-3">
+                    <label for="email" class="form-label fw-semibold text-secondary">Email Address</label>
+                    <div class="input-group">
+                        <span class="input-group-text bg-transparent border-end-0 border-secondary-subtle">
+                            <i class="bi bi-envelope text-secondary"></i>
+                        </span>
+                        {{ form.email(class="form-control form-control-premium border-start-0 ps-0", placeholder="john.doe@college.edu") }}
+                    </div>
+                    {% if form.email.errors %}
+                        <div class="text-danger small mt-1">{% for error in form.email.errors %}{{ error }}{% endfor %}</div>
+                    {% endif %}
+                </div>
+                
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label for="college" class="form-label fw-semibold text-secondary">College / University</label>
+                        {{ form.college(class="form-control form-control-premium", placeholder="IIT/NIT/State College") }}
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label for="branch" class="form-label fw-semibold text-secondary">Branch / Stream</label>
+                        {{ form.branch(class="form-select form-control-premium") }}
+                    </div>
+                </div>
+                
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label for="password" class="form-label fw-semibold text-secondary">Password</label>
+                        {{ form.password(class="form-control form-control-premium", placeholder="Password") }}
+                        {% if form.password.errors %}
+                            <div class="text-danger small mt-1">{% for error in form.password.errors %}{{ error }}{% endfor %}</div>
+                        {% endif %}
+                    </div>
+                    <div class="col-md-6 mb-4">
+                        <label for="confirm_password" class="form-label fw-semibold text-secondary">Confirm</label>
+                        {{ form.confirm_password(class="form-control form-control-premium", placeholder="Retype") }}
+                        {% if form.confirm_password.errors %}
+                            <div class="text-danger small mt-1">{% for error in form.confirm_password.errors %}{{ error }}{% endfor %}</div>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <button type="submit" class="btn btn-premium w-100 mb-3">
+                    <i class="bi bi-person-plus me-2"></i>Create Account
+                </button>
+            </form>
+            
+            <div class="text-center mt-2">
+                <p class="mb-0 text-secondary small">Already registered? <a href="{{ url_for('auth.login') }}" class="fw-semibold text-primary text-decoration-none">Sign In Here</a></p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

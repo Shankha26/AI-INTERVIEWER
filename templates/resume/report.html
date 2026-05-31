@@ -1,0 +1,142 @@
+{% extends "base.html" %}
+
+{% block title %}ATS Report - PrepAI Pro{% endblock %}
+{% block page_title %}ATS Assessment Report{% endblock %}
+
+{% block content %}
+<div class="row">
+    <!-- Left Column: ATS Score Circle Gauges -->
+    <div class="col-lg-4 mb-4">
+        <div class="premium-card text-center d-flex flex-column align-items-center justify-content-center h-100 py-5">
+            <h5 class="fw-bold text-secondary mb-4">ATS Suitability Score</h5>
+            
+            <div class="progress-ring mb-4" style="width: 150px; height: 150px;">
+                <svg width="150" height="150">
+                    <circle class="progress-ring-bg" cx="75" cy="75" r="65" stroke-width="12"></circle>
+                    <circle class="progress-ring-bar" cx="75" cy="75" r="65" stroke-width="12" stroke-dasharray="408.4" stroke-dashoffset="{{ 408.4 - (408.4 * analysis.ats_score / 100) }}"></circle>
+                </svg>
+                <div class="progress-ring-text" style="font-size: 2rem;">{{ analysis.ats_score }}%</div>
+            </div>
+            
+            {% if analysis.ats_score >= 80 %}
+                <span class="badge bg-success px-4 py-2 rounded-pill fw-bold">Excellent Fit</span>
+            {% elif analysis.ats_score >= 60 %}
+                <span class="badge bg-warning px-4 py-2 rounded-pill fw-bold">Moderate Fit</span>
+            {% else %}
+                <span class="badge bg-danger px-4 py-2 rounded-pill fw-bold">Needs Rework</span>
+            {% endif %}
+            
+            <hr class="w-70 my-4 border-secondary-subtle">
+            
+            <div class="text-start px-2 w-100">
+                <h6 class="fw-bold mb-3"><i class="bi bi-info-circle text-primary me-2"></i>Analysis Metrics</h6>
+                <div class="d-flex justify-content-between mb-2">
+                    <span class="text-secondary small">Scanned On:</span>
+                    <span class="small fw-semibold">{{ analysis.created_at.strftime('%b %d, %Y') }}</span>
+                </div>
+                <div class="d-flex justify-content-between">
+                    <span class="text-secondary small">Readability:</span>
+                    <span class="small fw-semibold text-success">Optimized</span>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Right Column: Strengths and Weaknesses -->
+    <div class="col-lg-8 mb-4">
+        <div class="premium-card h-100">
+            <h5 class="fw-bold mb-4"><i class="bi bi-file-earmark-text-fill text-primary me-2"></i>Content Highlights</h5>
+            
+            <div class="row mb-4">
+                <div class="col-md-6 mb-3 mb-md-0">
+                    <div class="p-3 border border-success-subtle rounded-4 h-100 bg-success-subtle bg-opacity-10">
+                        <h6 class="fw-bold text-success mb-3"><i class="bi bi-patch-check-fill me-2"></i>Core Strengths</h6>
+                        <ul class="list-unstyled small mb-0 d-flex flex-column gap-2 text-secondary">
+                            {% for str_item in strengths %}
+                                <li><i class="bi bi-check-circle text-success me-2"></i>{{ str_item }}</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                </div>
+                
+                <div class="col-md-6">
+                    <div class="p-3 border border-danger-subtle rounded-4 h-100 bg-danger-subtle bg-opacity-10">
+                        <h6 class="fw-bold text-danger mb-3"><i class="bi bi-patch-exclamation-fill me-2"></i>Weaknesses</h6>
+                        <ul class="list-unstyled small mb-0 d-flex flex-column gap-2 text-secondary">
+                            {% for weak_item in weaknesses %}
+                                <li><i class="bi bi-x-circle text-danger me-2"></i>{{ weak_item }}</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="mb-4">
+                <h6 class="fw-bold text-primary mb-3"><i class="bi bi-arrow-up-circle-fill me-2"></i>Suggestions for Rework</h6>
+                <div class="p-3 border rounded-4 bg-body-tertiary">
+                    <ul class="list-unstyled small mb-0 d-flex flex-column gap-2 text-secondary">
+                        {% for sug_item in suggestions %}
+                            <li><i class="bi bi-chevron-right text-indigo me-2"></i>{{ sug_item }}</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Bottom Section: Keywords and Skills -->
+<div class="row">
+    <div class="col-md-6 mb-4">
+        <div class="premium-card h-100">
+            <h5 class="fw-bold mb-3"><i class="bi bi-tags-fill text-primary me-2"></i>Identified Skills</h5>
+            <p class="text-secondary small mb-4">We found these capabilities inside your resume text. Ensure these align with your target roles.</p>
+            <div class="d-flex flex-wrap gap-2">
+                {% if skills %}
+                    {% for skill in skills %}
+                        <span class="badge bg-indigo-subtle text-primary border border-primary-subtle px-3 py-2 rounded-pill">{{ skill }}</span>
+                    {% endfor %}
+                {% else %}
+                    <span class="text-secondary small">No specific skills parsed. Add standard framework/tool keywords.</span>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-6 mb-4">
+        <div class="premium-card h-100">
+            <h5 class="fw-bold mb-3"><i class="bi bi-exclamation-triangle-fill text-warning me-2"></i>Recommended Keywords</h5>
+            <p class="text-secondary small mb-4">These placement keywords are missing but highly sought by recruiters. Add these to increase search discoverability.</p>
+            <div class="d-flex flex-wrap gap-2">
+                {% if missing_keywords %}
+                    {% for word in missing_keywords %}
+                        <span class="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle px-3 py-2 rounded-pill">{{ word }}</span>
+                    {% endfor %}
+                {% else %}
+                    <span class="text-secondary small">Excellent! Your resume matches all standard keyword indexes.</span>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-12 mb-4">
+        <div class="premium-card">
+            <h5 class="fw-bold mb-3"><i class="bi bi-layout-text-sidebar-reverse text-indigo me-2"></i>Formatting & Layout Assessment</h5>
+            <p class="text-secondary small mb-0">{{ analysis.formatting_feedback }}</p>
+        </div>
+    </div>
+</div>
+
+<div class="row mb-5">
+    <div class="col-12 text-center">
+        <a href="{{ url_for('resume.analyzer') }}" class="btn btn-premium rounded-pill px-4 me-3">
+            <i class="bi bi-file-earmark-arrow-up me-2"></i>Analyze Another
+        </a>
+        <a href="{{ url_for('dashboard.index') }}" class="btn btn-outline-secondary rounded-pill px-4">
+            <i class="bi bi-house me-2"></i>Back to Dashboard
+        </a>
+    </div>
+</div>
+{% endblock %}

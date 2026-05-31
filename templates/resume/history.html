@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+
+{% block title %}Scan History - PrepAI Pro{% endblock %}
+{% block page_title %}Resume Scan Logs{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="premium-card">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h5 class="fw-bold mb-0"><i class="bi bi-clock-history text-primary me-2"></i>Past Assessments</h5>
+                <a href="{{ url_for('resume.analyzer') }}" class="btn btn-premium btn-sm rounded-pill px-3">
+                    <i class="bi bi-plus-circle me-1"></i> New Analysis
+                </a>
+            </div>
+
+            {% if analyses %}
+            <div class="table-responsive">
+                <table class="table glass-table align-middle">
+                    <thead>
+                        <tr class="text-secondary small">
+                            <th>Scan ID</th>
+                            <th>ATS Score</th>
+                            <th>Primary Skills Identified</th>
+                            <th>Date Conducted</th>
+                            <th class="text-end">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for ana in analyses %}
+                        <tr>
+                            <td>
+                                <span class="fw-bold">#{{ ana.id }}</span>
+                            </td>
+                            <td>
+                                <div class="d-flex align-items-center gap-2">
+                                    <span
+                                        class="badge {% if ana.ats_score >= 80 %}bg-success{% elif ana.ats_score >= 60 %}bg-warning{% else %}bg-danger{% endif %} px-2.5 py-1.5 rounded-pill">
+                                        {{ ana.ats_score }}%
+                                    </span>
+                                </div>
+                            </td>
+                            <td>
+                                <span class="text-secondary small text-truncate d-inline-block"
+                                    style="max-width: 350px;">
+                                    {{ ana.skills or 'None Identified' }}
+                                </span>
+                            </td>
+                            <td>
+                                <span class="text-secondary small">{{ ana.created_at.strftime('%b %d, %Y - %H:%M')
+                                    }}</span>
+                            </td>
+                            <td class="text-end">
+                                <a href="{{ url_for('resume.report', analysis_id=ana.id) }}"
+                                    class="btn btn-outline-secondary btn-sm rounded-pill px-3">
+                                    <i class="bi bi-eye-fill me-1"></i> View Report
+                                </a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="text-center py-5 text-secondary">
+                <i class="bi bi-file-earmark-bar-graph fs-1 mb-3 d-block"></i>
+                <p class="mb-3">You have not scanned any resumes yet.</p>
+                <a href="{{ url_for('resume.analyzer') }}" class="btn btn-premium rounded-pill px-4">
+                    Upload Resume PDF
+                </a>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
