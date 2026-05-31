@@ -1,6 +1,6 @@
 from functools import wraps
 from flask import Blueprint, render_template, request, redirect, url_for, flash, abort
-from flask_login import login_required, current_user
+from flask_login import login_required, current_user, logout_user
 from models.database import db
 from models.user import User
 from models.question import Question
@@ -14,8 +14,13 @@ admin_bp = Blueprint('admin', __name__, url_prefix='/admin')
 def admin_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
-        if not current_user.is_authenticated or not current_user.is_admin:
-            abort(403) # Forbidden
+        if not current_user.is_authenticated:
+            flash('Please log in to access the Administrative Panel.', 'warning')
+            return redirect(url_for('auth.login'))
+        if not current_user.is_admin:
+            logout_user() # Auto-logout sticking non-admin candidate sessions
+            flash('Access Denied: Admin privileges required. Please sign in with an Administrator account.', 'danger')
+            return redirect(url_for('auth.login'))
         return f(*args, **kwargs)
     return decorated_function
 
