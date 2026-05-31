@@ -144,12 +144,12 @@
 
         /* Feature Card Grid */
         .feature-card {
-            background: var(--glass-bg);
-            border: 1px solid var(--glass-border);
+            background: rgba(30, 41, 59, 0.45) !important;
+            border: 1px solid rgba(255, 255, 255, 0.08) !important;
             border-radius: 24px;
             padding: 2.5rem;
-            box-shadow: var(--card-shadow);
-            transition: transform 0.3s ease, border-color 0.3s ease;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+            transition: transform 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
             backdrop-filter: blur(12px);
             -webkit-backdrop-filter: blur(12px);
             height: 100%;
@@ -157,7 +157,18 @@
 
         .feature-card:hover {
             transform: translateY(-5px);
-            border-color: rgba(99, 102, 241, 0.3);
+            border-color: rgba(99, 102, 241, 0.45) !important;
+            box-shadow: 0 20px 40px rgba(99, 102, 241, 0.15);
+        }
+
+        .feature-card p {
+            color: rgba(243, 244, 246, 0.65) !important;
+            font-size: 0.9rem;
+            line-height: 1.6;
+        }
+
+        .feature-card h5 {
+            color: #ffffff !important;
         }
 
         .feature-icon-wrapper {
@@ -489,11 +500,11 @@
     </section>
 
     <!-- Features Overview Section -->
-    <section id="features" class="py-5 bg-secondary-subtle bg-opacity-20 border-top border-bottom border-secondary-subtle">
+    <section id="features" class="py-5 border-top border-bottom" style="background: rgba(11, 15, 25, 0.5) !important; border-color: rgba(255, 255, 255, 0.05) !important;">
         <div class="container py-4">
             <div class="text-center mb-5">
-                <h2 class="fw-bold mb-2">Platform Capabilities</h2>
-                <p class="text-secondary small">Four core modules built to maximize your technical knowledge and speaking confidence.</p>
+                <h2 class="fw-bold mb-2 text-white">Platform Capabilities</h2>
+                <p class="text-white-50 small">Four core modules built to maximize your technical knowledge and speaking confidence.</p>
             </div>
             
             <div class="row g-4">
@@ -550,8 +561,8 @@
             <div class="row justify-content-center">
                 <div class="col-lg-8">
                     <i class="bi bi-globe text-primary fs-1 mb-3 d-block"></i>
-                    <h3 class="fw-bold mb-3">UN Sustainable Development Goal 4 Alignment</h3>
-                    <p class="text-secondary small mb-4" style="line-height: 1.7;">PrepAI Pro is dedicated to fostering **Quality Education** (SDG 4) and promoting lifelong learning opportunities. By offering institutional-grade mock environments, timed quizzes, and career guidance roadmaps completely free of charge, we empower students from all academic sectors to develop critical skills, master technical logic, and enter the modern placement job market with confidence.</p>
+                    <h3 class="fw-bold mb-3 text-white">UN Sustainable Development Goal 4 Alignment</h3>
+                    <p class="text-white-50 small mb-4" style="line-height: 1.7;">PrepAI Pro is dedicated to fostering **Quality Education** (SDG 4) and promoting lifelong learning opportunities. By offering institutional-grade mock environments, timed quizzes, and career guidance roadmaps completely free of charge, we empower students from all academic sectors to develop critical skills, master technical logic, and enter the modern placement job market with confidence.</p>
                     
                     <a href="{{ url_for('auth.register') }}" class="btn btn-premium rounded-pill px-4">
                         Enroll and Start preparing
