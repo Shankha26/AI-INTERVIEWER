@@ -1,6 +1,7 @@
 from datetime import datetime
 from flask_login import UserMixin
 from werkzeug.security import generate_password_hash, check_password_hash
+from sqlalchemy.ext.hybrid import hybrid_property
 from models.database import db
 
 class User(db.Model, UserMixin):
@@ -9,12 +10,12 @@ class User(db.Model, UserMixin):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), nullable=False)
     email = db.Column(db.String(120), unique=True, nullable=False, index=True)
-    password_hash = db.Column(db.String(255), nullable=False)
+    password = db.Column(db.String(255), nullable=False)
     college = db.Column(db.String(150), nullable=True)
     branch = db.Column(db.String(100), nullable=True)
     profile_image = db.Column(db.String(255), nullable=True, default='default.png')
-    is_admin = db.Column(db.Boolean, default=False)
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    role = db.Column(db.String(50), default='candidate', nullable=False)
+    createdAt = db.Column(db.DateTime, default=datetime.utcnow)
     
     # Relationships
     resumes = db.relationship('ResumeAnalysis', backref='user', cascade='all, delete-orphan', lazy=True)
@@ -26,11 +27,44 @@ class User(db.Model, UserMixin):
     recordings = db.relationship('Recording', backref='user', cascade='all, delete-orphan', lazy=True)
     voice_interviews = db.relationship('VoiceInterview', backref='user', cascade='all, delete-orphan', lazy=True)
 
+    # Hybrid properties for full backward compatibility
+    @hybrid_property
+    def password_hash(self):
+        return self.password
+        
+    @password_hash.setter
+    def password_hash(self, value):
+        self.password = value
+
+    @hybrid_property
+    def is_admin(self):
+        return self.role == 'admin'
+        
+    @is_admin.setter
+    def is_admin(self, value):
+        self.role = 'admin' if value else 'candidate'
+        
+    @is_admin.expression
+    def is_admin(cls):
+        return cls.role == 'admin'
+
+    @hybrid_property
+    def created_at(self):
+        return self.createdAt
+        
+    @created_at.setter
+    def created_at(self, value):
+        self.createdAt = value
+        
+    @created_at.expression
+    def created_at(cls):
+        return cls.createdAt
+
     def set_password(self, password):
-        self.password_hash = generate_password_hash(password)
+        self.password = generate_password_hash(password)
         
     def check_password(self, password):
-        return check_password_hash(self.password_hash, password)
+        return check_password_hash(self.password, password)
 
     def to_dict(self):
         return {
@@ -40,6 +74,7 @@ class User(db.Model, UserMixin):
             'college': self.college,
             'branch': self.branch,
             'profile_image': self.profile_image,
-            'is_admin': self.is_admin,
-            'created_at': self.created_at.isoformat() if self.created_at else None
+            'role': self.role,
+            'createdAt': self.createdAt.isoformat() if self.createdAt else None
         }
+
