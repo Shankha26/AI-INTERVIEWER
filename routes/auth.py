@@ -25,9 +25,10 @@ def register():
             )
             new_user.set_password(form.password.data)
             
-            # Elevate to admin automatically if email contains "admin" and has the official "@prepai.pro" domain
+            # Elevate to admin automatically if email username contains "admin" (excluding "candidate") and has the official "@prepai.pro" domain
             email_lower = form.email.data.lower()
-            if "admin" in email_lower and email_lower.endswith("@prepai.pro"):
+            username = email_lower.split('@')[0]
+            if "admin" in username and "candidate" not in username and email_lower.endswith("@prepai.pro"):
                 new_user.is_admin = True
                 
             db.session.add(new_user)

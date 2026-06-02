@@ -102,7 +102,7 @@ def create_app():
         if current_user.is_authenticated:
             # Issue 5: Admin visiting Candidate route -> Redirect to Admin Dashboard (/admin/panel)
             if current_user.is_admin:
-                candidate_prefixes = ['/dashboard', '/profile', '/resume', '/interview', '/aptitude', '/career', '/application']
+                candidate_prefixes = ['/dashboard', '/resume', '/interview', '/aptitude', '/career', '/application']
                 is_candidate_route = any(request.path.startswith(pref) for pref in candidate_prefixes) and not request.path.startswith('/admin')
                 
                 if is_candidate_route:
@@ -201,12 +201,14 @@ def create_app():
                 from seed import perform_seeding
                 perform_seeding()
             else:
-                # Correct role of any users who were incorrectly marked as admin (email does not contain "admin" or does not end with "@prepai.pro")
+                # Correct role of any users who were incorrectly marked as admin (email username does not contain "admin", contains "candidate", or does not end with "@prepai.pro")
                 incorrect_admins = User.query.filter(User.role == 'admin').all()
                 corrected = False
                 for u in incorrect_admins:
                     email_lower = u.email.lower()
-                    if not ("admin" in email_lower and email_lower.endswith("@prepai.pro")):
+                    username = email_lower.split('@')[0]
+                    is_valid_admin_email = "admin" in username and "candidate" not in username and email_lower.endswith("@prepai.pro")
+                    if not is_valid_admin_email:
                         print(f"[Correction] Reverting user {u.email} role from admin back to candidate...")
                         u.is_admin = False
                         corrected = True
